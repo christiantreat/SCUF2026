@@ -1,0 +1,745 @@
+<title>Ocular POCUS Simulator</title>
+<style>
+  :root {
+    --void: #06060c;
+    --surface: #0e0e1a;
+    --raised: #16162a;
+    --border: #262642;
+    --text: #b0b8c4;
+    --text-bright: #dce0e8;
+    --text-muted: #4e5668;
+    --vh: #d48a2e;
+    --vh-dim: #3a2800;
+    --rd: #2ea8cc;
+    --rd-dim: #0a2a38;
+    --accent: #3c7eaa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    text-align: center;
+    padding: 28px 16px 4px;
+    width: 100%;
+    max-width: 1080px;
+  }
+  header h1 {
+    font-size: clamp(16px, 2.6vw, 24px);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  header .sub {
+    font-size: clamp(11px, 1.5vw, 13px);
+    color: var(--text-muted);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ---------- gain bar ---------- */
+  .gain-bar {
+    width: 100%;
+    max-width: 1080px;
+    padding: 14px 20px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .gain-bar label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    white-space: nowrap;
+  }
+  .gain-bar input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: clamp(160px, 24vw, 280px);
+    height: 6px;
+    background: var(--raised);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .gain-bar input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--text-bright);
+    cursor: pointer;
+  }
+  .gain-bar input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--text-bright);
+    cursor: pointer;
+  }
+  .gain-db {
+    font-family: 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 44px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .gain-db span {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+
+  /* ---------- panels ---------- */
+  .panels {
+    display: flex;
+    gap: 14px;
+    padding: 8px 14px;
+    width: 100%;
+    max-width: 1080px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: 520px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: var(--raised);
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-name {
+    font-size: clamp(11px, 1.4vw, 13px);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.4px;
+  }
+  .tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .tag-vh { background: var(--vh-dim); color: var(--vh); border: 1px solid #5a3a00; }
+  .tag-rd { background: var(--rd-dim); color: var(--rd); border: 1px solid #145a70; }
+  .canvas-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    cursor: ew-resize;
+    touch-action: none;
+    background: #000;
+  }
+  .canvas-area canvas { width: 100%; height: 100%; display: block; }
+
+  /* ---------- teaching strip ---------- */
+  .teach {
+    width: 100%;
+    max-width: 1080px;
+    padding: 6px 14px 4px;
+  }
+  .hint {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 22px;
+    padding: 4px 0;
+    transition: color .25s;
+    color: var(--text-muted);
+  }
+  .pearls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-top: 4px;
+  }
+  .pearl {
+    flex: 1;
+    min-width: 240px;
+  }
+  .pearl h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 6px;
+  }
+  .pearl.vh h3 { color: var(--vh); }
+  .pearl.rd h3 { color: var(--rd); }
+  .pearl ul { list-style: none; }
+  .pearl li {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.55;
+    padding-left: 14px;
+    position: relative;
+    margin-bottom: 2px;
+  }
+  .pearl.vh li::before,
+  .pearl.rd li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 7px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .pearl.vh li::before { background: var(--vh); opacity: .45; }
+  .pearl.rd li::before { background: var(--rd); opacity: .45; }
+
+  /* ---------- footer ---------- */
+  .foot {
+    width: 100%;
+    max-width: 1080px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 14px 24px;
+    flex-wrap: wrap;
+  }
+  .foot span {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--raised);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 12px;
+    letter-spacing: 0.2px;
+  }
+
+  @media (max-width: 680px) {
+    .panels { flex-direction: column; align-items: center; }
+    .panel { max-width: 100%; }
+  }
+</style>
+
+<header>
+  <h1>Point-of-Care Ocular Ultrasound Simulator</h1>
+  <div class="sub">Vitreous Hemorrhage vs Retinal Detachment &mdash; Gain Dependency Comparison</div>
+</header>
+
+<div class="gain-bar">
+  <label>Gain</label>
+  <input type="range" id="gain" min="10" max="95" value="25" step="1">
+  <div class="gain-db" id="gainDisp">25<span>dB</span></div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-name">Vitreous Hemorrhage</span>
+      <span class="tag tag-vh">Gain-Dependent</span>
+    </div>
+    <div class="canvas-area" id="areaVH"><canvas id="cvVH"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-name">Retinal Detachment</span>
+      <span class="tag tag-rd">Gain-Independent</span>
+    </div>
+    <div class="canvas-area" id="areaRD"><canvas id="cvRD"></canvas></div>
+  </div>
+</div>
+
+<div class="teach">
+  <div class="hint" id="hint"></div>
+  <div class="pearls">
+    <div class="pearl vh">
+      <h3>Vitreous Hemorrhage</h3>
+      <ul>
+        <li>Echoes appear and multiply as gain increases</li>
+        <li>Particles float freely, not tethered to any structure</li>
+        <li>Swirl and shift when you sweep the probe</li>
+        <li>At low gain the vitreous looks falsely clear</li>
+      </ul>
+    </div>
+    <div class="pearl rd">
+      <h3>Retinal Detachment</h3>
+      <ul>
+        <li>Bright membrane visible even at minimal gain</li>
+        <li>Anchored at the optic disc &mdash; classic tethered V</li>
+        <li>Stays fixed when you sweep; only the angle changes</li>
+        <li>Membrane brightness is gain-independent</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <span>Drag left / right on each panel to sweep the probe</span>
+  <span>Adjust gain to see the key difference</span>
+  <span>Runs offline from any USB &mdash; no install needed</span>
+  <span>For educational use only</span>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var RES = 520;
+  var cvVH = document.getElementById('cvVH');
+  var cvRD = document.getElementById('cvRD');
+  cvVH.width = cvVH.height = RES;
+  cvRD.width = cvRD.height = RES;
+  var ctxVH = cvVH.getContext('2d');
+  var ctxRD = cvRD.getContext('2d');
+  var gainEl = document.getElementById('gain');
+  var gainDisp = document.getElementById('gainDisp');
+  var hintEl = document.getElementById('hint');
+
+  var gain = 25;
+  var sweepVH = 0, sweepRD = 0;
+  var t = 0;
+
+  /* --- seeded RNG --- */
+  function sRng(s) {
+    return function () { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  }
+
+  /* --- VH particles --- */
+  var NP = 380;
+  var parts = [];
+  var rng = sRng(42);
+  for (var i = 0; i < NP; i++) {
+    var a = rng() * Math.PI * 2;
+    var rr = Math.pow(rng(), 0.6) * 0.88;
+    parts.push({
+      x: Math.cos(a) * rr, y: Math.sin(a) * rr,
+      sz: 0.8 + rng() * 2.8,
+      br: 0.25 + rng() * 0.75,
+      thr: 18 + rng() * 55,
+      ph: rng() * 6.28,
+      drift: (rng() - 0.5) * 0.015
+    });
+  }
+  // Sort by y for layering (dependent hemorrhage settles)
+  parts.sort(function (a, b) { return a.y - b.y; });
+
+  /* --- speckle noise texture --- */
+  var nCv = document.createElement('canvas');
+  nCv.width = nCv.height = RES;
+  var nCtx = nCv.getContext('2d');
+  var nImg = nCtx.createImageData(RES, RES);
+  var nr = sRng(777);
+  for (var j = 0; j < nImg.data.length; j += 4) {
+    var v = Math.floor(nr() * 35);
+    nImg.data[j] = nImg.data[j + 1] = nImg.data[j + 2] = v;
+    nImg.data[j + 3] = 28;
+  }
+  nCtx.putImageData(nImg, 0, 0);
+
+  /* --- geometry constants --- */
+  var PY = 12;                    // probe y
+  var SA = 0.72;                  // sector half-angle (rad)
+  var GR = RES * 0.225;           // globe radius
+  var GY = RES * 0.47;            // globe center y
+  var MONO = "'SF Mono','Cascadia Mono',Consolas,monospace";
+
+  /* --- drawing helpers --- */
+
+  function sectorClip(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(RES / 2, PY);
+    ctx.arc(RES / 2, PY, RES - 28, Math.PI / 2 - SA, Math.PI / 2 + SA);
+    ctx.closePath();
+  }
+
+  function tissue(ctx, gn) {
+    var sr = RES - 28;
+    var grd = ctx.createRadialGradient(RES / 2, PY, 10, RES / 2, PY, sr);
+    var b = Math.floor(6 + gn * 22);
+    grd.addColorStop(0, 'rgb(' + (b + 4) + ',' + (b + 4) + ',' + (b + 6) + ')');
+    grd.addColorStop(0.35, 'rgb(' + (b + 2) + ',' + (b + 2) + ',' + (b + 4) + ')');
+    grd.addColorStop(0.75, 'rgb(' + b + ',' + b + ',' + (b + 1) + ')');
+    grd.addColorStop(1, 'rgb(' + Math.floor(b * 0.5) + ',' + Math.floor(b * 0.5) + ',' + Math.floor(b * 0.6) + ')');
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+
+  function scanlines(ctx, gn) {
+    ctx.strokeStyle = 'rgba(80,100,130,' + (0.018 + gn * 0.012) + ')';
+    ctx.lineWidth = 0.5;
+    for (var a = -SA; a <= SA; a += 0.018) {
+      var er = RES - 28;
+      ctx.beginPath();
+      ctx.moveTo(RES / 2, PY);
+      ctx.lineTo(RES / 2 + Math.sin(a) * er, PY + Math.cos(a) * er);
+      ctx.stroke();
+    }
+  }
+
+  function globe(ctx, sw, gn) {
+    var cx = RES / 2 + sw * 14;
+    var cy = GY;
+    var r = GR;
+
+    // Posterior acoustic enhancement — bright band behind globe
+    var ehB = Math.floor(12 + gn * 30);
+    ctx.fillStyle = 'rgba(' + ehB + ',' + ehB + ',' + (ehB + 4) + ',0.35)';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.7, cy + r);
+    ctx.lineTo(cx + r * 0.7, cy + r);
+    ctx.lineTo(cx + r * 0.8, cy + r + 120);
+    ctx.lineTo(cx - r * 0.8, cy + r + 120);
+    ctx.closePath();
+    ctx.fill();
+
+    // Optic nerve shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy + r + 2);
+    ctx.lineTo(cx + 10, cy + r + 2);
+    ctx.lineTo(cx + 14, cy + r + 70);
+    ctx.lineTo(cx - 14, cy + r + 70);
+    ctx.closePath();
+    ctx.fill();
+
+    // Sclera glow
+    var sB = Math.floor(40 + gn * 70);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(' + sB + ',' + sB + ',' + Math.floor(sB * 1.05) + ',0.25)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Vitreous fill
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    var vg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    var vb = Math.floor(1 + gn * 4);
+    vg.addColorStop(0, 'rgb(' + vb + ',' + vb + ',' + (vb + 1) + ')');
+    vg.addColorStop(0.85, 'rgb(' + (vb + 1) + ',' + (vb + 1) + ',' + (vb + 2) + ')');
+    vg.addColorStop(1, 'rgb(' + (vb + 2) + ',' + (vb + 2) + ',' + (vb + 3) + ')');
+    ctx.fillStyle = vg;
+    ctx.fill();
+
+    // Posterior wall
+    var wB = Math.floor(90 + gn * 160);
+    wB = Math.min(255, wB);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI * 0.12, Math.PI * 0.88);
+    ctx.strokeStyle = 'rgb(' + wB + ',' + wB + ',' + Math.min(255, Math.floor(wB * 1.04)) + ')';
+    ctx.lineWidth = 4.5;
+    ctx.stroke();
+    // Wall glow
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 2, Math.PI * 0.18, Math.PI * 0.82);
+    ctx.strokeStyle = 'rgba(' + wB + ',' + wB + ',' + wB + ',0.2)';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+
+    // Lens crescent
+    var lB = Math.floor(65 + gn * 120);
+    lB = Math.min(255, lB);
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - r + 3, r * 0.42, r * 0.11, 0, Math.PI, Math.PI * 2);
+    ctx.strokeStyle = 'rgb(' + lB + ',' + lB + ',' + lB + ')';
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+
+    return { cx: cx, cy: cy, r: r };
+  }
+
+  function drawVH(ctx, g, gn, sw, tt) {
+    var cx = g.cx, cy = g.cy, r = g.r;
+    var gl = gain;
+
+    // Particles
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (gl < p.thr) continue;
+      var vis = Math.min(1, (gl - p.thr) / 15);
+
+      var px = cx + (p.x + Math.sin(tt * 0.4 + p.ph) * 0.018 + sw * 0.12 * p.br) * r;
+      var py = cy + (p.y + Math.cos(tt * 0.25 + p.ph) * 0.012 + p.drift * Math.sin(tt * 0.18)) * r;
+
+      var dx = px - cx, dy = py - cy;
+      if (dx * dx + dy * dy > r * r * 0.84) continue;
+
+      var bv = Math.floor(p.br * vis * (0.4 + gn * 0.6) * 220);
+      bv = Math.min(255, bv);
+      ctx.fillStyle = 'rgba(' + Math.min(255, bv + 15) + ',' + Math.min(255, bv + 8) + ',' + bv + ',' + (vis * 0.9) + ')';
+      ctx.beginPath();
+      ctx.arc(px, py, p.sz * (0.7 + gn * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Vitreous strands at higher gain
+    if (gl > 45) {
+      var sa = Math.min(0.55, (gl - 45) / 70);
+      ctx.strokeStyle = 'rgba(' + Math.floor(70 + gn * 90) + ',' + Math.floor(60 + gn * 70) + ',' + Math.floor(50 + gn * 50) + ',' + sa + ')';
+      ctx.lineWidth = 1.2;
+      for (var s = 0; s < 6; s++) {
+        var sr2 = sRng(s * 137 + Math.floor(sw * 2.5));
+        ctx.beginPath();
+        var sx = cx + (sr2() - 0.5) * r * 1.3;
+        var sy = cy + (sr2() - 0.5) * r * 1.3;
+        var dd = (sx - cx) * (sx - cx) + (sy - cy) * (sy - cy);
+        if (dd > r * r * 0.72) continue;
+        ctx.moveTo(sx, sy);
+        for (var seg = 0; seg < 5; seg++) {
+          sx += (sr2() - 0.5) * 28;
+          sy += (sr2() - 0.5) * 28;
+          ctx.lineTo(sx, sy);
+        }
+        ctx.stroke();
+      }
+    }
+
+    // Dense clumps at very high gain
+    if (gl > 70) {
+      var ca = (gl - 70) / 50;
+      for (var c = 0; c < 8; c++) {
+        var cr2 = sRng(c * 53 + 200);
+        var ccx = cx + (cr2() - 0.5) * r * 1.2;
+        var ccy = cy + (cr2() - 0.5) * r * 1.0 + r * 0.15;
+        dd = (ccx - cx) * (ccx - cx) + (ccy - cy) * (ccy - cy);
+        if (dd > r * r * 0.7) continue;
+        var csz = 4 + cr2() * 8;
+        var cb = Math.floor((40 + gn * 80) * ca);
+        ctx.fillStyle = 'rgba(' + cb + ',' + Math.floor(cb * 0.85) + ',' + Math.floor(cb * 0.65) + ',' + (ca * 0.5) + ')';
+        ctx.beginPath();
+        ctx.arc(ccx + Math.sin(tt * 0.3 + c) * 3, ccy, csz, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawRD(ctx, g, gn, sw, tt) {
+    var cx = g.cx, cy = g.cy, r = g.r;
+
+    // Membrane brightness: high and nearly constant
+    // Only a very slight boost with gain so it doesn't look static
+    var mb = Math.min(255, 190 + gn * 40);
+
+    var discX = cx;
+    var discY = cy + r * 0.82;
+
+    var spread = 0.52 + Math.abs(sw) * 0.04;
+    var tilt = sw * 0.07;
+
+    var armLen = r * (1.15 + Math.sin(tt * 0.12) * 0.025);
+    var lAng = -Math.PI / 2 - spread + tilt;
+    var rAng = -Math.PI / 2 + spread + tilt;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(' + mb + ',' + mb + ',' + Math.floor(mb * 0.92) + ',0.45)';
+    ctx.shadowBlur = 14;
+
+    ctx.strokeStyle = 'rgb(' + mb + ',' + mb + ',' + Math.min(255, Math.floor(mb * 1.03)) + ')';
+    ctx.lineWidth = 3.8;
+    ctx.lineCap = 'round';
+
+    // Left arm
+    var lCx = discX + Math.cos(lAng) * armLen * 0.5 + Math.sin(tt * 0.18 + 1) * 2.5;
+    var lCy = discY + Math.sin(lAng) * armLen * 0.5;
+    var lEx = discX + Math.cos(lAng) * armLen;
+    var lEy = discY + Math.sin(lAng) * armLen;
+    ctx.beginPath();
+    ctx.moveTo(discX, discY);
+    ctx.quadraticCurveTo(lCx, lCy, lEx, lEy);
+    ctx.stroke();
+
+    // Right arm
+    var rCx = discX + Math.cos(rAng) * armLen * 0.5 + Math.sin(tt * 0.18) * 2.5;
+    var rCy = discY + Math.sin(rAng) * armLen * 0.5;
+    var rEx = discX + Math.cos(rAng) * armLen;
+    var rEy = discY + Math.sin(rAng) * armLen;
+    ctx.beginPath();
+    ctx.moveTo(discX, discY);
+    ctx.quadraticCurveTo(rCx, rCy, rEx, rEy);
+    ctx.stroke();
+
+    // Connecting sail
+    var midX = (lEx + rEx) / 2;
+    var midY = Math.min(lEy, rEy) - r * 0.08;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(lEx, lEy);
+    ctx.quadraticCurveTo(midX, midY, rEx, rEy);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Disc attachment
+    ctx.beginPath();
+    ctx.arc(discX, discY, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgb(' + mb + ',' + mb + ',' + mb + ')';
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = 'rgba(' + Math.floor(mb * 0.7) + ',' + Math.floor(mb * 0.7) + ',' + Math.floor(mb * 0.7) + ',0.55)';
+    ctx.font = '9px ' + MONO;
+    ctx.textAlign = 'center';
+    ctx.fillText('OPTIC DISC', discX, discY + 13);
+  }
+
+  function depthMarks(ctx) {
+    ctx.strokeStyle = 'rgba(80,110,140,0.2)';
+    ctx.fillStyle = 'rgba(80,110,140,0.4)';
+    ctx.font = '9px ' + MONO;
+    ctx.textAlign = 'left';
+    ctx.lineWidth = 1;
+    var sLen = RES - 40;
+    var depths = [1, 2, 3, 4];
+    for (var d = 0; d < depths.length; d++) {
+      var yy = PY + (depths[d] / 4.5) * sLen;
+      var tx = RES / 2 - Math.tan(SA) * (yy - PY) + 4;
+      ctx.beginPath();
+      ctx.moveTo(tx, yy);
+      ctx.lineTo(tx + 7, yy);
+      ctx.stroke();
+      ctx.fillText(depths[d] + 'cm', tx - 5, yy - 3);
+    }
+  }
+
+  function probeIcon(ctx, sw) {
+    var px = RES / 2, py = 7;
+    var ang = sw * 0.055;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(ang);
+    ctx.fillStyle = '#2e3644';
+    ctx.fillRect(-11, -4, 22, 8);
+    ctx.fillStyle = '#5a8ab4';
+    ctx.fillRect(-7, 3, 14, 2.5);
+    ctx.restore();
+  }
+
+  function machineText(ctx, pathId) {
+    ctx.fillStyle = 'rgba(80,110,140,0.45)';
+    ctx.font = '9px ' + MONO;
+    ctx.textAlign = 'right';
+    ctx.fillText('10 MHz Linear', RES - 8, RES - 28);
+    ctx.fillText('MI 0.23  TIs 0.4', RES - 8, RES - 17);
+    ctx.fillText('Gain ' + gain + ' dB', RES - 8, RES - 6);
+    ctx.textAlign = 'left';
+    ctx.fillText(pathId === 'vh' ? 'VITREOUS HEMORRHAGE' : 'RETINAL DETACHMENT', 8, RES - 6);
+  }
+
+  function speckle(ctx, gn) {
+    ctx.globalAlpha = 0.12 + gn * 0.14;
+    ctx.drawImage(nCv, 0, 0);
+    ctx.globalAlpha = 1;
+  }
+
+  /* --- main draw --- */
+  function draw(ctx, pathId, sw, tt) {
+    var gn = (gain - 10) / 85;
+    ctx.clearRect(0, 0, RES, RES);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, RES, RES);
+
+    ctx.save();
+    sectorClip(ctx);
+    ctx.clip();
+    tissue(ctx, gn);
+    scanlines(ctx, gn);
+    var g = globe(ctx, sw, gn);
+    if (pathId === 'vh') drawVH(ctx, g, gn, sw, tt);
+    else drawRD(ctx, g, gn, sw, tt);
+    speckle(ctx, gn);
+    ctx.restore();
+
+    depthMarks(ctx);
+    probeIcon(ctx, sw);
+    machineText(ctx, pathId);
+  }
+
+  /* --- hints --- */
+  function updateHint() {
+    var txt, col;
+    if (gain < 28) {
+      txt = 'Low gain — vitreous appears clear on VH side, but the RD membrane is already bright and visible.';
+      col = '#5080a0';
+    } else if (gain < 48) {
+      txt = 'Moderate gain — VH particles starting to appear. The RD membrane looks exactly the same.';
+      col = '#6a9a6a';
+    } else if (gain < 72) {
+      txt = 'Higher gain — VH “snowstorm” filling the vitreous. RD membrane brightness unchanged.';
+      col = '#c09030';
+    } else {
+      txt = 'Maximum gain — VH globe is dense with echoes. RD still shows only the same tethered membrane.';
+      col = '#b85030';
+    }
+    hintEl.textContent = txt;
+    hintEl.style.color = col;
+  }
+
+  /* --- drag --- */
+  function drag(el, getS, setS) {
+    var active = false, x0, s0;
+    function down(e) {
+      active = true;
+      var pt = e.touches ? e.touches[0] : e;
+      x0 = pt.clientX; s0 = getS();
+      e.preventDefault();
+    }
+    function move(e) {
+      if (!active) return;
+      var pt = e.touches ? e.touches[0] : e;
+      var dx = pt.clientX - x0;
+      var w = el.getBoundingClientRect().width;
+      setS(Math.max(-4, Math.min(4, s0 + (dx / w) * 8)));
+      e.preventDefault();
+    }
+    function up() { active = false; }
+    el.addEventListener('mousedown', down);
+    el.addEventListener('touchstart', down, { passive: false });
+    window.addEventListener('mousemove', move);
+    window.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', up);
+    window.addEventListener('touchend', up);
+  }
+  drag(document.getElementById('areaVH'), function () { return sweepVH; }, function (v) { sweepVH = v; });
+  drag(document.getElementById('areaRD'), function () { return sweepRD; }, function (v) { sweepRD = v; });
+
+  /* --- gain slider --- */
+  gainEl.addEventListener('input', function () {
+    gain = parseInt(this.value);
+    gainDisp.innerHTML = gain + '<span>dB</span>';
+    updateHint();
+  });
+
+  /* --- loop --- */
+  function frame(ts) {
+    t = ts * 0.001;
+    draw(ctxVH, 'vh', sweepVH, t);
+    draw(ctxRD, 'rd', sweepRD, t);
+    requestAnimationFrame(frame);
+  }
+  updateHint();
+  requestAnimationFrame(frame);
+})();
+</script>
