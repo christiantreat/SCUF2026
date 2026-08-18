@@ -358,36 +358,41 @@ function drawVH(g,gn){
 function drawRD(g,gn,tt,macOn){
   var cx=g.cx,cy=g.cy,r=g.r;
   var mb=Math.min(255,190+gn*40);
-  var dX=g.discX,dY=g.discY;
   var sway=rdAfter*Math.sin(tt*1.3)*5;
   var sway2=rdAfter*Math.cos(tt*.9)*3;
 
-  var nLen=r*1.18,nSpread=.52+Math.abs(sweep)*.03;
-  var tLen=macOn?r*.42:r*1.18;
-  var tSpread=macOn?.16:nSpread;
-  var nA=-Math.PI/2-nSpread,tA=-Math.PI/2+tSpread;
+  var dAng=DISC_ANG;
+  var oraN=Math.PI*.87;
+  var oraT=Math.PI*.13;
+  var tEnd=macOn?MAC_ANG+.08:oraT;
+  var maxLift=r*.3;
+  var N=40;
 
   ctx.save();
   ctx.shadowColor='rgba('+mb+','+mb+','+Math.floor(mb*.88)+',0.3)';ctx.shadowBlur=14;
   ctx.strokeStyle='rgb('+mb+','+mb+','+Math.min(255,Math.floor(mb*1.02))+')';
   ctx.lineWidth=3.5;ctx.lineCap='round';
 
-  var nCx=dX+Math.cos(nA)*nLen*.5+sway,nCy=dY+Math.sin(nA)*nLen*.5+sway2;
-  var nEx=dX+Math.cos(nA)*nLen+sway*.5,nEy=dY+Math.sin(nA)*nLen;
-  ctx.beginPath();ctx.moveTo(dX,dY);ctx.quadraticCurveTo(nCx,nCy,nEx,nEy);ctx.stroke();
-
-  var tCx=dX+Math.cos(tA)*tLen*.5+sway,tCy=dY+Math.sin(tA)*tLen*.5+sway2;
-  var tEx=dX+Math.cos(tA)*tLen+sway*.5,tEy=dY+Math.sin(tA)*tLen;
-  ctx.beginPath();ctx.moveTo(dX,dY);ctx.quadraticCurveTo(tCx,tCy,tEx,tEy);ctx.stroke();
-
-  if(!macOn){
-    ctx.lineWidth=2.5;
-    var bY=Math.min(nEy,tEy)-r*.06;
-    ctx.beginPath();ctx.moveTo(nEx,nEy);ctx.quadraticCurveTo((nEx+tEx)/2,bY+sway*.3,tEx,tEy);ctx.stroke();
+  function arm(a0,a1,taper){
+    ctx.beginPath();
+    for(var i=0;i<=N;i++){
+      var f=i/N,ang=a0+(a1-a0)*f;
+      var lf=taper?Math.sin(f*Math.PI):Math.sin(Math.min(f*1.5,1)*Math.PI*.5);
+      var lift=maxLift*lf,pr=r+1-lift;
+      var sw=lf>.01?lf:0;
+      var px=cx+Math.cos(ang)*pr+sway*sw;
+      var py=cy+Math.sin(ang)*pr+sway2*sw;
+      if(!i)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
   }
+
+  arm(dAng,oraN,true);
+  arm(dAng,tEnd,!macOn);
   ctx.restore();
 
-  ctx.beginPath();ctx.arc(dX,dY,3,0,Math.PI*2);
+  var ddx=cx+Math.cos(dAng)*(r+1),ddy=cy+Math.sin(dAng)*(r+1);
+  ctx.beginPath();ctx.arc(ddx,ddy,3,0,Math.PI*2);
   ctx.fillStyle='rgb('+mb+','+mb+','+mb+')';ctx.fill();
 }
 
