@@ -1,0 +1,712 @@
+<title>Ocular POCUS Simulator</title>
+<style>
+  :root{
+    --void:#06060c;--surface:#0e0e1a;--raised:#16162a;--border:#262642;
+    --text:#b0b8c4;--bright:#dce0e8;--muted:#4e5668;
+    --norm:#5a9a6a;--vh:#d48a2e;--rd:#2ea8cc;--rdem:#d44a4a;--accent:#3c7eaa;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--void);color:var(--text);
+    font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  header{text-align:center;padding:20px 14px 2px;width:100%;max-width:660px}
+  header h1{
+    font-size:clamp(14px,2.8vw,20px);font-weight:700;color:var(--bright);
+    letter-spacing:1px;text-transform:uppercase;
+  }
+  header .sub{font-size:clamp(10px,1.5vw,12px);color:var(--muted);margin-top:2px;letter-spacing:.3px}
+  .toolbar{
+    width:100%;max-width:660px;padding:10px 12px 4px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+  }
+  .modes{display:flex;gap:4px;flex-wrap:wrap}
+  .mbtn{
+    padding:6px 9px;background:var(--raised);border:1px solid var(--border);
+    border-radius:4px;color:var(--text);font-size:9px;font-weight:700;
+    cursor:pointer;text-transform:uppercase;letter-spacing:.5px;
+    transition:background .12s,color .12s;font-family:inherit;
+    border-top:2px solid transparent;min-height:30px;
+  }
+  .mbtn:hover{background:#1e1e38}
+  .mbtn.on[data-m="normal"]{color:var(--norm);border-top-color:var(--norm);background:#0e1a14}
+  .mbtn.on[data-m="vh"]{color:var(--vh);border-top-color:var(--vh);background:#1a1408}
+  .mbtn.on[data-m="rd-on"]{color:var(--rdem);border-top-color:var(--rdem);background:#1a0a0a}
+  .mbtn.on[data-m="rd-off"]{color:var(--rd);border-top-color:var(--rd);background:#0a1820}
+  .controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .gain-grp{display:flex;align-items:center;gap:5px}
+  .gain-grp label{font-size:8px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
+  .gain-grp input[type="range"]{
+    -webkit-appearance:none;appearance:none;width:clamp(60px,11vw,120px);
+    height:4px;background:var(--raised);border-radius:2px;outline:none;
+    cursor:pointer;border:1px solid var(--border);
+  }
+  .gain-grp input::-webkit-slider-thumb{
+    -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--bright);cursor:pointer;
+  }
+  .gain-grp input::-moz-range-thumb{
+    width:13px;height:13px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--bright);cursor:pointer;
+  }
+  .gain-db{
+    font-family:'SF Mono','Cascadia Mono',Consolas,monospace;
+    font-size:11px;font-weight:700;color:var(--accent);
+    min-width:34px;text-align:right;font-variant-numeric:tabular-nums;
+  }
+  .gain-db i{font-style:normal;font-size:8px;font-weight:400;color:var(--muted);margin-left:1px}
+  .ctrl-btn{
+    padding:5px 9px;background:var(--raised);border:1px solid var(--border);
+    border-radius:4px;color:var(--text);font-size:9px;font-weight:700;
+    cursor:pointer;text-transform:uppercase;letter-spacing:.4px;
+    font-family:inherit;transition:background .12s,color .12s;
+  }
+  .ctrl-btn:hover{background:#1e1e38}
+  .ctrl-btn.on{color:var(--accent);border-color:var(--accent);background:#0c1c2e}
+  .eye-btn{color:var(--vh)}
+  .eye-btn:active,.eye-btn.flash{background:#3a2510;color:var(--vh);border-color:var(--vh)}
+  .display{width:100%;max-width:660px;padding:4px 12px}
+  .screen{
+    position:relative;width:100%;aspect-ratio:1;
+    cursor:crosshair;touch-action:none;
+    background:#000;border-radius:6px;overflow:hidden;border:1px solid var(--border);
+  }
+  .screen canvas{width:100%;height:100%;display:block}
+  .hint{
+    width:100%;max-width:660px;padding:5px 14px 0;
+    text-align:center;font-size:11px;font-weight:600;
+    min-height:18px;transition:color .2s;color:var(--muted);line-height:1.45;
+  }
+  .teach{width:100%;max-width:660px;padding:5px 12px 3px}
+  .teach-box{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:6px;padding:10px 14px;
+  }
+  .teach-box h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;margin-bottom:4px}
+  .teach-box ul{list-style:none}
+  .teach-box li{font-size:11px;color:var(--text);line-height:1.5;padding-left:12px;position:relative;margin-bottom:1px}
+  .refs{width:100%;max-width:660px;padding:3px 12px}
+  .refs details{background:var(--surface);border:1px solid var(--border);border-radius:6px}
+  .refs summary{
+    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+    color:var(--accent);padding:8px 14px;cursor:pointer;list-style:none;user-select:none;
+  }
+  .refs summary::-webkit-details-marker{display:none}
+  .refs summary::before{content:'+ '}
+  .refs details[open] summary::before{content:'- '}
+  .refs ol{padding:4px 14px 10px 28px;margin:0}
+  .refs li{font-size:10px;color:var(--text);margin-bottom:5px;line-height:1.45}
+  .refs li strong{color:var(--bright);font-size:10px}
+  .refs a{color:var(--accent);text-decoration:none;font-size:9px;word-break:break-all}
+  .refs a:hover{text-decoration:underline}
+  .projects{width:100%;max-width:660px;padding:3px 12px}
+  .projects-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;
+  }
+  .projects-box h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:var(--accent);margin-bottom:6px}
+  .projects-box .proj{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+  .projects-box .proj a{
+    color:var(--bright);font-size:11px;font-weight:600;text-decoration:none;
+  }
+  .projects-box .proj a:hover{text-decoration:underline;color:var(--accent)}
+  .projects-box .proj span{font-size:10px;color:var(--muted)}
+  .foot{width:100%;max-width:660px;text-align:center;padding:6px 12px 22px}
+  .foot span{
+    display:inline-block;font-size:10px;color:var(--muted);
+    background:var(--raised);border:1px solid var(--border);
+    border-radius:4px;padding:4px 9px;margin:2px;letter-spacing:.2px;
+  }
+  @media(max-width:480px){
+    .toolbar{flex-direction:column;align-items:stretch}
+    .modes{justify-content:center}
+    .controls{justify-content:center}
+  }
+</style>
+
+<header>
+  <h1>Point-of-Care Ocular Ultrasound</h1>
+  <div class="sub">Linear Probe Simulator &mdash; Drag: left/right sweeps, up/down adjusts gain</div>
+</header>
+
+<div class="toolbar">
+  <div class="modes">
+    <button class="mbtn on" data-m="normal">Normal</button>
+    <button class="mbtn" data-m="vh">VH</button>
+    <button class="mbtn" data-m="rd-on">RD Mac-On</button>
+    <button class="mbtn" data-m="rd-off">RD Mac-Off</button>
+  </div>
+  <div class="controls">
+    <div class="gain-grp">
+      <label>Gain</label>
+      <input type="range" id="gain" min="10" max="95" value="25">
+      <div class="gain-db" id="gDisp">25<i>dB</i></div>
+    </div>
+    <button class="ctrl-btn on" id="lblBtn">Labels</button>
+    <button class="ctrl-btn eye-btn" id="eyeBtn">Eye Move</button>
+  </div>
+</div>
+
+<div class="display">
+  <div class="screen" id="scr"><canvas id="cv"></canvas></div>
+</div>
+
+<div class="hint" id="hint"></div>
+
+<div class="teach">
+  <div class="teach-box" id="teachBox"></div>
+</div>
+
+<div class="refs">
+  <details>
+    <summary>FOAME References &amp; Further Reading</summary>
+    <ol>
+      <li><strong>The POCUS Atlas</strong> &mdash; Ocular section. RD sensitivity 97-100%, specificity 83-100%. 67% of fundus-obscuring VH have associated retinal tear.<br><a href="https://www.thepocusatlas.com/ocular" target="_blank" rel="noopener">thepocusatlas.com/ocular</a></li>
+      <li><strong>ALiEM</strong> &mdash; Ocular Ultrasound: RD vs PVD differentiation, probe technique, kinetic exam.<br><a href="https://www.aliem.com/ocular-ultrasound-retinal-detachment-posterior-vitreous-detachment/" target="_blank" rel="noopener">aliem.com/ocular-ultrasound</a></li>
+      <li><strong>POCUS 101</strong> &mdash; Step-by-step guide: washing machine sign, gain optimization, technique pearls.<br><a href="https://www.pocus101.com/ocular-ultrasound-made-easy-step-by-step-guide/" target="_blank" rel="noopener">pocus101.com/ocular-ultrasound</a></li>
+      <li><strong>JETem</strong> &mdash; Mac-off RD on bedside US. Mac-on vs mac-off urgency, tethering anatomy.<br><a href="https://jetem.org/mac-off-rd/" target="_blank" rel="noopener">jetem.org/mac-off-rd</a></li>
+      <li><strong>JETem</strong> &mdash; Bedside US of RD in a 19-year-old. Sensitivity/specificity data.<br><a href="https://jetem.org/retinaldetachment_ultrasound/" target="_blank" rel="noopener">jetem.org/retinaldetachment_ultrasound</a></li>
+      <li><strong>ACEP Sonoguide</strong> &mdash; Ocular emergencies, kinetic assessment, aftermovement evaluation.<br><a href="https://www.acep.org/sonoguide/advanced/ocular-emergencies" target="_blank" rel="noopener">acep.org/sonoguide</a></li>
+      <li><strong>StatPearls</strong> &mdash; Point-of-care ocular US. Probe settings, safety (MI &lt; 0.23), contraindications.<br><a href="https://www.ncbi.nlm.nih.gov/books/NBK459120/" target="_blank" rel="noopener">ncbi.nlm.nih.gov/books/NBK459120</a></li>
+      <li><strong>Wenger et al. 2023</strong> &mdash; Gain optimization (Western J Emerg Med). VH: 71% low &rarr; 88% high. RD: 97-98% all gains.<br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10284517/" target="_blank" rel="noopener">PMC10284517</a></li>
+      <li><strong>LITFL</strong> &mdash; Ocular US library, clinical cases, and the "Ocular Ultrasound Challenge."<br><a href="https://litfl.com/ultrasound-library/ocular-ultrasound/" target="_blank" rel="noopener">litfl.com/ocular-ultrasound</a></li>
+      <li><strong>EMOttawa</strong> &mdash; ONSD &lt; 5 mm, optic disc elevation, technique pearls.<br><a href="https://emottawablog.com/2022/08/ocular-pocus-keep-your-prize-on-the-eyes/" target="_blank" rel="noopener">emottawablog.com</a></li>
+      <li><strong>Core EM</strong> &mdash; Ocular US overview, retinal vs vitreous detachment, ONSD, CRAO.<br><a href="https://coreem.net/core/ocular-ultrasound/" target="_blank" rel="noopener">coreem.net/core/ocular-ultrasound</a></li>
+    </ol>
+  </details>
+</div>
+
+<div class="projects">
+  <div class="projects-box">
+    <h3>Conference Projects</h3>
+    <div class="proj"><a href="https://github.com/christiantreat/sonogames" target="_blank" rel="noopener">SonoGames</a><span>&mdash; Ultrasound gamification for education</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/sonowolf" target="_blank" rel="noopener">SonoWolf</a><span>&mdash; Social deduction game for US interpretation</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/ultraclean" target="_blank" rel="noopener">UltraClean</a><span>&mdash; Ultrasound image optimization tools</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/zine" target="_blank" rel="noopener">Zine</a><span>&mdash; Visual learning zines for point-of-care ultrasound</span></div>
+  </div>
+</div>
+
+<div class="foot">
+  <span>Drag: L/R sweep, U/D gain</span>
+  <span>Spacebar or button: patient eye movement</span>
+  <span>Runs offline &mdash; no install</span>
+  <span>For educational use only</span>
+</div>
+
+<script>
+(function(){
+'use strict';
+var R=600;
+var cv=document.getElementById('cv');cv.width=cv.height=R;
+var ctx=cv.getContext('2d');
+var gainEl=document.getElementById('gain');
+var gDisp=document.getElementById('gDisp');
+var hintEl=document.getElementById('hint');
+var teachBox=document.getElementById('teachBox');
+var btns=document.querySelectorAll('.mbtn');
+var lblBtn=document.getElementById('lblBtn');
+var eyeBtn=document.getElementById('eyeBtn');
+
+var mode='normal',gain=25,sweep=0,t=0;
+var showLabels=true,eyeVel=0,eyeDir=1,rdAfter=0;
+var MONO="'SF Mono','Cascadia Mono',Consolas,monospace";
+
+var FW=Math.floor(R*.82),FX=Math.floor((R-FW)/2);
+var FY=16,FH=R-FY-8;
+var S=FH/45;
+var GR=12*S,GY=FY+14*S;
+var DISC_OFF=GR*.06;
+var MAC_OFF=4*S;
+var ONW=Math.floor(1.8*S);
+var DISC_ANG=Math.atan2(GR,-DISC_OFF);
+var MAC_ANG=DISC_ANG-MAC_OFF/GR;
+var DISC_HW=0.055;
+
+function sr(s){return function(){s=(s*16807)%2147483647;return s/2147483647}}
+
+var NP=400,parts=[],rng=sr(42);
+for(var i=0;i<NP;i++){
+  var a=rng()*6.283,rr=Math.pow(rng(),.55)*.86;
+  parts.push({x:Math.cos(a)*rr,y:Math.sin(a)*rr,
+    sz:.7+rng()*2.6,br:.2+rng()*.8,thr:16+rng()*58,ph:rng()*6.28});
+}
+parts.sort(function(a,b){return a.y-b.y});
+
+var nCv=document.createElement('canvas');nCv.width=nCv.height=R;
+var nCtx=nCv.getContext('2d');
+var nD=nCtx.createImageData(R,R),nr=sr(777);
+for(var j=0;j<nD.data.length;j+=4){
+  var v=Math.floor(nr()*18);nD.data[j]=nD.data[j+1]=nD.data[j+2]=v;nD.data[j+3]=14;
+}
+nCtx.putImageData(nD,0,0);
+
+function fieldClip(){ctx.beginPath();ctx.rect(FX,FY,FW,FH);ctx.closePath()}
+
+function tissue(gn){
+  var g=ctx.createLinearGradient(R/2,FY,R/2,FY+FH);
+  var b=Math.floor(5+gn*18);
+  g.addColorStop(0,'rgb('+(b+4)+','+(b+4)+','+(b+6)+')');
+  g.addColorStop(.15,'rgb('+(b+2)+','+(b+2)+','+(b+4)+')');
+  g.addColorStop(.55,'rgb('+b+','+b+','+(b+1)+')');
+  g.addColorStop(1,'rgb('+Math.floor(b*.3)+','+Math.floor(b*.3)+','+Math.floor(b*.4)+')');
+  ctx.fillStyle=g;ctx.fill();
+}
+
+function scanLines(gn){
+  ctx.strokeStyle='rgba(70,90,120,'+(0.007+gn*.005)+')';ctx.lineWidth=.3;
+  for(var x=FX;x<=FX+FW;x+=3){ctx.beginPath();ctx.moveTo(x,FY);ctx.lineTo(x,FY+FH);ctx.stroke()}
+}
+
+function drawGlobe(sw,gn){
+  var cx=R/2+sw*12,cy=GY,r=GR;
+  var dX=cx-DISC_OFF,dY=cy+r;
+
+  var eb=Math.floor(8+gn*22);
+  ctx.fillStyle='rgba('+eb+','+eb+','+(eb+3)+',0.22)';
+  ctx.beginPath();ctx.moveTo(cx-r*.55,cy+r);ctx.lineTo(cx+r*.55,cy+r);
+  ctx.lineTo(cx+r*.65,cy+r+110);ctx.lineTo(cx-r*.65,cy+r+110);ctx.closePath();ctx.fill();
+
+  ctx.fillStyle='rgba(0,0,0,.5)';
+  ctx.beginPath();ctx.moveTo(dX-ONW,cy+r);ctx.lineTo(dX+ONW,cy+r);
+  ctx.lineTo(dX+ONW+2,cy+r+85);ctx.lineTo(dX-ONW-2,cy+r+85);ctx.closePath();ctx.fill();
+  var sb=Math.floor(50+gn*100);sb=Math.min(255,sb);
+  ctx.strokeStyle='rgba('+sb+','+sb+','+Math.min(255,Math.floor(sb*1.05))+',0.55)';ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(dX-ONW,cy+r+2);ctx.lineTo(dX-ONW-2,cy+r+70);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(dX+ONW,cy+r+2);ctx.lineTo(dX+ONW+2,cy+r+70);ctx.stroke();
+  var onsdY=cy+r+3*S;
+  ctx.strokeStyle='rgba('+sb+','+sb+','+sb+',.2)';ctx.lineWidth=.8;ctx.setLineDash([2,2]);
+  ctx.beginPath();ctx.moveTo(dX-ONW-5,onsdY);ctx.lineTo(dX+ONW+5,onsdY);ctx.stroke();ctx.setLineDash([]);
+
+  var mB=Math.floor(12+gn*16);
+  ctx.fillStyle='rgba('+mB+','+mB+','+(mB+2)+',0.3)';
+  ctx.beginPath();ctx.moveTo(cx-r-3,cy-r*.1);ctx.lineTo(cx-r,cy-r*.1);
+  ctx.lineTo(cx-r+4,cy+r+20);ctx.lineTo(cx-r-1,cy+r+20);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx+r,cy-r*.1);ctx.lineTo(cx+r+3,cy-r*.1);
+  ctx.lineTo(cx+r-4,cy+r+20);ctx.lineTo(cx+r+1,cy+r+20);ctx.closePath();ctx.fill();
+
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  var vg=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  var vb=Math.floor(1+gn*3);
+  vg.addColorStop(0,'rgb('+vb+','+vb+','+(vb+1)+')');
+  vg.addColorStop(.85,'rgb('+(vb+1)+','+(vb+1)+','+(vb+1)+')');
+  vg.addColorStop(1,'rgb('+(vb+2)+','+(vb+2)+','+(vb+3)+')');
+  ctx.fillStyle=vg;ctx.fill();
+
+  var sB=Math.floor(28+gn*50);sB=Math.min(200,sB);
+  ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);
+  ctx.strokeStyle='rgba('+sB+','+sB+','+Math.floor(sB*1.05)+',0.16)';ctx.lineWidth=3;ctx.stroke();
+
+  var wB=Math.floor(85+gn*165);wB=Math.min(255,wB);
+  ctx.strokeStyle='rgb('+wB+','+wB+','+Math.min(255,Math.floor(wB*1.03))+')';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.arc(cx,cy,r+1,Math.PI*.08,DISC_ANG-DISC_HW);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r+1,DISC_ANG+DISC_HW,Math.PI*.92);ctx.stroke();
+
+  var iB=Math.floor(wB*.6);
+  ctx.strokeStyle='rgba('+iB+','+iB+','+iB+',0.35)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(cx,cy,r-2.5,Math.PI*.1,Math.PI*.9);ctx.stroke();
+  ctx.strokeStyle='rgba('+wB+','+wB+','+wB+',0.1)';ctx.lineWidth=10;
+  ctx.beginPath();ctx.arc(cx,cy,r+4,Math.PI*.12,Math.PI*.88);ctx.stroke();
+
+  var lB=Math.floor(55+gn*120);lB=Math.min(255,lB);
+  var lensY=cy-r+3.5*S,lensW=r*.42,lensH=2.25*S;
+  ctx.beginPath();ctx.ellipse(cx,lensY-lensH*.25,lensW,lensH*.4,0,Math.PI,Math.PI*2);
+  ctx.strokeStyle='rgb('+lB+','+lB+','+lB+')';ctx.lineWidth=1.8;ctx.stroke();
+  ctx.beginPath();ctx.ellipse(cx,lensY+lensH*.25,lensW*.95,lensH*.5,0,0,Math.PI);
+  var lB2=Math.min(255,Math.floor(lB*1.1));
+  ctx.strokeStyle='rgb('+lB2+','+lB2+','+lB2+')';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.ellipse(cx,lensY,lensW*.88,lensH*.35,0,0,Math.PI*2);
+  ctx.fillStyle='rgba('+Math.floor(vb*1.2)+','+Math.floor(vb*1.2)+','+Math.floor(vb*1.2)+',0.5)';ctx.fill();
+
+  var irY=lensY-lensH*.5;
+  var irB=Math.floor(42+gn*85);irB=Math.min(255,irB);
+  var pupW=r*.12;
+  ctx.strokeStyle='rgba('+irB+','+irB+','+irB+',0.5)';ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(cx-r*.55,irY+2);ctx.lineTo(cx-pupW,irY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+pupW,irY);ctx.lineTo(cx+r*.55,irY+2);ctx.stroke();
+
+  var cB=Math.floor(32+gn*65);cB=Math.min(255,cB);
+  var cornY=cy-r+1*S;
+  ctx.beginPath();ctx.moveTo(cx-r*.65,cornY+2);ctx.quadraticCurveTo(cx,cornY-3,cx+r*.65,cornY+2);
+  ctx.strokeStyle='rgba('+cB+','+cB+','+cB+',0.38)';ctx.lineWidth=1.6;ctx.stroke();
+
+  var lidB=Math.floor(36+gn*70);lidB=Math.min(255,lidB);
+  ctx.beginPath();ctx.moveTo(cx-r*.8,FY+8);ctx.quadraticCurveTo(cx,FY+5,cx+r*.8,FY+8);
+  ctx.strokeStyle='rgba('+lidB+','+lidB+','+lidB+',0.3)';ctx.lineWidth=2;ctx.stroke();
+
+  var macWX=cx+(r+1)*Math.cos(MAC_ANG),macWY=cy+(r+1)*Math.sin(MAC_ANG);
+  return{cx:cx,cy:cy,r:r,discX:dX,discY:dY,macX:macWX,macY:macWY};
+}
+
+function drawVH(g,gn){
+  var cx=g.cx,cy=g.cy,r=g.r;
+  for(var i=0;i<parts.length;i++){
+    var p=parts[i];if(gain<p.thr)continue;
+    var vis=Math.min(1,(gain-p.thr)/14);
+    var px=cx+p.x*r,py=cy+p.y*r;
+    var dx=px-cx,dy=py-cy;
+    if(dx*dx+dy*dy>r*r*.82)continue;
+    var bv=Math.floor(p.br*vis*(.35+gn*.65)*230);bv=Math.min(255,bv);
+    ctx.fillStyle='rgba('+Math.min(255,bv+12)+','+Math.min(255,bv+6)+','+bv+','+(vis*.85)+')';
+    ctx.beginPath();ctx.arc(px,py,p.sz*(.65+gn*.5),0,Math.PI*2);ctx.fill();
+  }
+  if(gain>42){
+    var sa=Math.min(.5,(gain-42)/65);
+    ctx.strokeStyle='rgba('+Math.floor(60+gn*80)+','+Math.floor(50+gn*60)+','+Math.floor(40+gn*40)+','+sa+')';
+    ctx.lineWidth=1;
+    for(var s=0;s<6;s++){
+      var sr2=sr(s*131+Math.floor(sweep*2));ctx.beginPath();
+      var sx=cx+(sr2()-.5)*r*1.1,sy=cy+(sr2()-.5)*r;
+      var dd=(sx-cx)*(sx-cx)+(sy-cy)*(sy-cy);if(dd>r*r*.7)continue;
+      ctx.moveTo(sx,sy);
+      for(var sg=0;sg<4;sg++){sx+=(sr2()-.5)*22;sy+=(sr2()-.5)*22;ctx.lineTo(sx,sy)}
+      ctx.stroke();
+    }
+  }
+  if(gain>68){
+    var ca=(gain-68)/54;
+    for(var c=0;c<8;c++){
+      var cr2=sr(c*47+211);
+      var ccx=cx+(cr2()-.5)*r,ccy=cy+(cr2()-.5)*r*.8+r*.12;
+      var dd=(ccx-cx)*(ccx-cx)+(ccy-cy)*(ccy-cy);if(dd>r*r*.65)continue;
+      var csz=3+cr2()*6,cb=Math.floor((30+gn*65)*ca);
+      ctx.fillStyle='rgba('+cb+','+Math.floor(cb*.8)+','+Math.floor(cb*.6)+','+(ca*.4)+')';
+      ctx.beginPath();ctx.arc(ccx,ccy,csz,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+
+function drawRD(g,gn,tt,macOn){
+  var cx=g.cx,cy=g.cy,r=g.r;
+  var mb=Math.min(255,190+gn*40);
+  var sway=rdAfter*Math.sin(tt*1.3)*5;
+  var sway2=rdAfter*Math.cos(tt*.9)*3;
+
+  var dAng=DISC_ANG;
+  var oraN=Math.PI*.87;
+  var oraT=Math.PI*.13;
+  var maxLift=r*.3;
+  var N=40;
+
+  ctx.save();
+  ctx.shadowColor='rgba('+mb+','+mb+','+Math.floor(mb*.88)+',0.3)';ctx.shadowBlur=14;
+  ctx.strokeStyle='rgb('+mb+','+mb+','+Math.min(255,Math.floor(mb*1.02))+')';
+  ctx.lineWidth=3.5;ctx.lineCap='round';
+
+  function arm(a0,a1,taper){
+    ctx.beginPath();
+    for(var i=0;i<=N;i++){
+      var f=i/N,ang=a0+(a1-a0)*f;
+      var lf=taper?Math.sin(f*Math.PI):Math.sin(Math.min(f*1.5,1)*Math.PI*.5);
+      var lift=maxLift*lf,pr=r+1-lift;
+      var sw=lf>.01?lf:0;
+      var px=cx+Math.cos(ang)*pr+sway*sw;
+      var py=cy+Math.sin(ang)*pr+sway2*sw;
+      if(!i)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+  }
+
+  if(macOn)arm(dAng,oraN,true);
+  else arm(dAng,oraT,true);
+  ctx.restore();
+
+  var ddx=cx+Math.cos(dAng)*(r+1),ddy=cy+Math.sin(dAng)*(r+1);
+  ctx.beginPath();ctx.arc(ddx,ddy,3,0,Math.PI*2);
+  ctx.fillStyle='rgb('+mb+','+mb+','+mb+')';ctx.fill();
+}
+
+function drawMacMarker(g,gn,md){
+  var isRD=md==='rd-on'||md==='rd-off';
+  if(!isRD&&!showLabels)return;
+  var attached=md!=='rd-off';
+  var col=attached?'80,200,90':'220,80,80';
+  var alpha=isRD?0.7:0.35;
+  ctx.fillStyle='rgba('+col+','+alpha+')';
+  ctx.beginPath();ctx.arc(g.macX,g.macY,isRD?3:2,0,Math.PI*2);ctx.fill();
+  if(isRD){
+    ctx.strokeStyle='rgba('+col+','+(alpha*.6)+')';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(g.macX,g.macY-7);ctx.lineTo(g.macX,g.macY+7);ctx.stroke();
+  }
+}
+
+function drawLabels(g,md,gn){
+  if(!showLabels)return;
+  var cx=g.cx,cy=g.cy,r=g.r;
+  var lb=Math.floor(42+gn*42);lb=Math.min(155,lb);
+  var c='rgba('+lb+','+Math.floor(lb*1.1)+','+Math.floor(lb*1.25)+',0.5)';
+  ctx.fillStyle=c;ctx.font='7px '+MONO;ctx.textAlign='center';
+
+  ctx.fillText('CORNEA',cx,cy-r+.5*S);
+  ctx.fillText('ANT CHAMBER',cx+r*.35,cy-r+2.2*S);
+  ctx.fillText('IRIS',cx-r*.48,cy-r+3*S);
+  ctx.fillText('LENS',cx,cy-r+5.5*S);
+  if(md==='normal')ctx.fillText('VITREOUS',cx,cy+2);
+  ctx.fillText('R/C/S',cx+r*.5,cy+r+14);
+  ctx.fillText('ON',g.discX,cy+r+48);
+  ctx.font='6px '+MONO;
+  ctx.fillText('ONSD',g.discX,cy+r+3*S-3);
+  ctx.fillText('MR',cx-r-12,cy+r*.15);
+  ctx.fillText('LR',cx+r+12,cy+r*.15);
+
+  ctx.font='7px '+MONO;
+  if(md==='rd-on'||md==='rd-off'||showLabels){
+    var mc=md==='rd-off'?'rgba(220,80,80,.55)':md==='rd-on'?'rgba(80,200,90,.55)':c;
+    ctx.fillStyle=mc;ctx.fillText('MACULA',g.macX,g.macY-9);
+  }
+
+  ctx.font='9px '+MONO;
+  if(md==='vh'&&gain>30){
+    ctx.fillStyle='rgba('+Math.floor(170+gn*40)+','+Math.floor(115+gn*25)+',35,.5)';
+    ctx.fillText('HEMORRHAGE',cx,cy+4);
+  }
+  if(md==='rd-on'){
+    ctx.fillStyle='rgba('+Math.floor(190+gn*30)+',60,60,.55)';
+    ctx.fillText('DETACHED RETINA',cx-r*.35,cy-r*.1);
+    ctx.font='bold 8px '+MONO;
+    ctx.fillStyle='rgba(220,70,70,.65)';ctx.fillText('EMERGENCY',cx,cy+r+28);
+    ctx.font='7px '+MONO;ctx.fillText('MAC-ON: HOURS TO REPAIR',cx,cy+r+39);
+    ctx.fillStyle='rgba(80,200,90,.6)';ctx.fillText('ATTACHED',g.macX,g.macY+12);
+  }
+  if(md==='rd-off'){
+    ctx.fillStyle='rgba(40,'+Math.floor(140+gn*30)+','+Math.floor(170+gn*40)+',.5)';
+    ctx.fillText('DETACHED RETINA',cx+r*.35,cy-r*.1);
+    ctx.font='bold 8px '+MONO;
+    ctx.fillStyle='rgba(46,168,204,.65)';ctx.fillText('URGENT',cx,cy+r+28);
+    ctx.font='7px '+MONO;ctx.fillText('MAC-OFF: 24-72H REPAIR',cx,cy+r+39);
+    ctx.fillStyle='rgba(220,80,80,.6)';ctx.fillText('DETACHED',g.macX,g.macY+12);
+  }
+}
+
+function probeBar(sw){
+  ctx.fillStyle='#1e2630';ctx.fillRect(FX-4,0,FW+8,12);
+  ctx.fillStyle='#3a6888';ctx.fillRect(FX,10,FW,3);
+  var tx=R/2+sw*12;
+  ctx.fillStyle='#6aaecc';ctx.beginPath();ctx.arc(tx,11,3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(100,140,170,.4)';ctx.font='7px '+MONO;ctx.textAlign='center';
+  ctx.fillText('LINEAR 10 MHz',R/2,8);
+}
+
+function machineOvr(md){
+  ctx.fillStyle='rgba(80,190,90,.5)';ctx.font='bold 8px '+MONO;ctx.textAlign='left';
+  ctx.fillText('LIVE',FX+3,FY+10);
+  ctx.fillStyle='rgba(70,100,130,.4)';ctx.font='8px '+MONO;
+  ctx.textAlign='right';ctx.fillText('OCULAR R',FX+FW-2,FY+10);
+  ctx.textAlign='left';
+  var nm=md==='normal'?'NORMAL':md==='vh'?'VIT HEMORRHAGE':md==='rd-on'?'RD MAC-ON':'RD MAC-OFF';
+  ctx.fillText(nm,FX+3,FY+FH-5);
+  ctx.textAlign='right';
+  ctx.fillText('MI 0.23  TIs 0.4',FX+FW-2,FY+FH-25);
+  ctx.fillText('GAIN '+gain+' dB',FX+FW-2,FY+FH-15);
+  ctx.fillText('10 MHz  DR 60',FX+FW-2,FY+FH-5);
+  var focusY=FY+(2.5/4.5)*FH;
+  ctx.fillStyle='rgba(70,100,130,.45)';ctx.beginPath();
+  ctx.moveTo(FX-7,focusY-3);ctx.lineTo(FX-1,focusY);ctx.lineTo(FX-7,focusY+3);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(70,100,130,.18)';ctx.lineWidth=1;
+  for(var tg=0;tg<5;tg++){
+    var tgY=FY+(tg+.5)*(FH/5);var tgW=5+(tg>2?tg-1:0);
+    ctx.beginPath();ctx.moveTo(FX+FW+2,tgY);ctx.lineTo(FX+FW+2+tgW,tgY);ctx.stroke();
+  }
+}
+
+function depthMarks(){
+  ctx.strokeStyle='rgba(70,100,130,.18)';ctx.fillStyle='rgba(70,100,130,.35)';
+  ctx.font='7px '+MONO;ctx.textAlign='right';ctx.lineWidth=.8;
+  [1,2,3,4].forEach(function(d){
+    var yy=FY+(d/4.5)*FH;
+    ctx.beginPath();ctx.moveTo(FX,yy);ctx.lineTo(FX+4,yy);ctx.stroke();
+    ctx.fillText(d+'cm',FX-2,yy+3);
+  });
+}
+
+function spk(gn){ctx.globalAlpha=.08+gn*.1;ctx.drawImage(nCv,0,0);ctx.globalAlpha=1}
+
+function updateEyePhysics(){
+  if(eyeVel>0.005){
+    for(var i=0;i<parts.length;i++){
+      var p=parts[i],dist=Math.sqrt(p.x*p.x+p.y*p.y);
+      if(dist<.01)continue;
+      var ang=Math.atan2(p.y,p.x);
+      ang+=eyeVel*.018*eyeDir*(1-dist*.4);
+      var turb=eyeVel*.004;
+      p.x=Math.cos(ang)*dist+(Math.random()-.5)*turb;
+      p.y=Math.sin(ang)*dist+(Math.random()-.5)*turb;
+      var nd=Math.sqrt(p.x*p.x+p.y*p.y);
+      if(nd>.85){p.x*=.85/nd;p.y*=.85/nd}
+    }
+    eyeVel*=.988;
+    rdAfter=Math.min(1,eyeVel*2.5);
+  }else{
+    eyeVel=0;
+    if(rdAfter>0.001)rdAfter*=.96;else rdAfter=0;
+    for(var i=0;i<parts.length;i++){
+      parts[i].y+=.00012;
+      var nd=Math.sqrt(parts[i].x*parts[i].x+parts[i].y*parts[i].y);
+      if(nd>.85){parts[i].x*=.85/nd;parts[i].y*=.85/nd}
+    }
+  }
+}
+
+function render(){
+  var gn=(gain-10)/85;
+  ctx.clearRect(0,0,R,R);ctx.fillStyle='#000';ctx.fillRect(0,0,R,R);
+  ctx.save();fieldClip();ctx.clip();
+  tissue(gn);scanLines(gn);
+  var g=drawGlobe(sweep,gn);
+  if(mode==='vh')drawVH(g,gn);
+  else if(mode==='rd-on')drawRD(g,gn,t,true);
+  else if(mode==='rd-off')drawRD(g,gn,t,false);
+  drawMacMarker(g,gn,mode);
+  spk(gn);
+  ctx.restore();
+  drawLabels(g,mode,gn);
+  depthMarks();probeBar(sweep);machineOvr(mode);
+}
+
+var hints={
+  normal:[
+    [28,'Normal globe at baseline. Anechoic vitreous, intact posterior wall, lens capsules visible.'],
+    [50,'Moderate gain. Vitreous stays echo-free. Good anatomy visualization.'],
+    [72,'High gain on normal eye. Noise is artifact, not pathology — compare to VH mode.'],
+    [999,'Max gain. Switch to VH at this gain — the difference is the teaching point.']
+  ],
+  vh:[
+    [26,'Low gain — VH sensitivity only 71% here (Wenger 2023). Always increase gain to screen.'],
+    [46,'Particles appearing. Press Eye Move button (or spacebar) for washing machine sign.'],
+    [70,'High gain — 88% sensitivity. Press Eye Move — debris swirls with patient eye movement.'],
+    [999,'Dense hemorrhage. 67% of VH have an associated retinal tear — always check for RD.']
+  ],
+  'rd-on':[
+    [26,'EMERGENCY: Mac-on RD. Nasal detachment visible even at low gain (97-100% sensitivity).'],
+    [46,'Detachment on nasal side of disc — macula (green dot) still attached on temporal side.'],
+    [70,'Gain-independent — same membrane at all gains. Emergent repair within hours.'],
+    [999,'Mac-on: repair within hours to save central vision. Patient may still see well.']
+  ],
+  'rd-off':[
+    [26,'URGENT: Mac-off RD. Temporal detachment extends past macula at all gain levels.'],
+    [46,'Detachment on temporal side of disc — passes the macula position (red dot = detached).'],
+    [70,'Central vision already compromised. Urgent repair within 24-72 hours.'],
+    [999,'Gain-independent: same membrane, same brightness. Screen for concurrent VH at high gain.']
+  ]
+};
+var hColors={normal:'#5a9a6a',vh:'#c09030','rd-on':'#d44a4a','rd-off':'#4a9aba'};
+
+function updateHint(){
+  var h=hints[mode];
+  for(var i=0;i<h.length;i++){if(gain<h[i][0]){hintEl.textContent=h[i][1];break}}
+  hintEl.style.color=hColors[mode];
+}
+
+var teachData={
+  normal:{
+    title:'Normal Globe &amp; Technique',color:'var(--norm)',
+    items:[
+      'High-frequency linear probe (10 MHz), ophthalmologic/small-parts preset (MI < 0.23)',
+      'Tegaderm over closed lid, generous gel, stabilize hand on brow (ALiEM)',
+      'Depth 4-5 cm. Vitreous is anechoic — no internal echoes at appropriate gain',
+      'Posterior wall: retina + choroid + sclera (RCS complex) appear as single bright line',
+      'ONSD measured 3 mm behind globe: normal < 5 mm (96% sensitive for elevated ICP)',
+      'Contraindicated if globe rupture suspected'
+    ]
+  },
+  vh:{
+    title:'Vitreous Hemorrhage',color:'var(--vh)',
+    items:[
+      '"Washing machine sign" — debris swirls with PATIENT EYE MOVEMENT, not probe sweep (POCUS 101)',
+      'Sensitivity improves with gain: 71% low → 88% high (Wenger 2023) — always screen at high gain',
+      'Free-floating particles, NOT tethered to optic disc (key differentiator vs RD)',
+      '67% of fundus-obscuring VH have an associated retinal tear (POCUS Atlas)',
+      'Blood settles with gravity when eye is still — use kinetic exam to trigger washing machine sign',
+      'Compare to PVD: both untethered, but VH = diffuse particles vs PVD = thin membrane'
+    ]
+  },
+  'rd-on':{
+    title:'RD Mac-On — Surgical Emergency',color:'var(--rdem)',
+    items:[
+      'Macula STILL ATTACHED — emergent repair within hours to preserve central vision (JETem)',
+      'Detachment on nasal side of disc — does NOT extend past macula (3 mm temporal to disc)',
+      'More subtle presentation: patient may still have relatively good central vision',
+      'Higher risk of missed diagnosis — use ultrasound to confirm suspected RD',
+      'Thick hyperechoic membrane tethered at optic disc, curving along globe wall (gain-independent)',
+      'Limited aftermovement on kinetic exam — stiffer than VH, stays anchored at disc'
+    ]
+  },
+  'rd-off':{
+    title:'RD Mac-Off — Urgent (24-72h)',color:'var(--rd)',
+    items:[
+      'Macula DETACHED — central vision already compromised. Urgent repair 24-72 hours (JETem)',
+      'Membrane on temporal side of disc — extends past macula position',
+      'Tethered at optic disc, curving along globe wall toward ora serrata (anteriorly)',
+      'Gain-independent: 97-100% sensitivity at ALL gain levels (POCUS Atlas, Wenger 2023)',
+      'Chronic RD: evolves V → Y/T → funnel shape, membrane thickens, aftermovement decreases',
+      'Always screen at high gain to check for concurrent vitreous hemorrhage'
+    ]
+  }
+};
+
+function updateTeach(){
+  var d=teachData[mode];
+  var h='<h3 style="color:'+d.color+'">'+d.title+'</h3><ul>';
+  d.items.forEach(function(it){h+='<li>'+it+'</li>'});
+  h+='</ul>';teachBox.innerHTML=h;
+  var accent=mode==='normal'?'90,154,106':mode==='vh'?'212,138,46':mode==='rd-on'?'212,74,74':'46,168,204';
+  teachBox.querySelectorAll('li').forEach(function(li){
+    li.style.cssText='position:relative;padding-left:12px;font-size:11px;color:var(--text);line-height:1.5;margin-bottom:1px';
+    var dot=document.createElement('span');
+    dot.style.cssText='position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:rgba('+accent+',.4)';
+    li.prepend(dot);
+  });
+}
+
+btns.forEach(function(btn){
+  btn.addEventListener('click',function(){
+    btns.forEach(function(b){b.classList.remove('on')});
+    btn.classList.add('on');mode=btn.getAttribute('data-m');
+    updateHint();updateTeach();
+  });
+});
+
+gainEl.addEventListener('input',function(){
+  gain=parseInt(this.value);gDisp.innerHTML=gain+'<i>dB</i>';updateHint();
+});
+
+lblBtn.addEventListener('click',function(){
+  showLabels=!showLabels;lblBtn.classList.toggle('on',showLabels);
+});
+
+function triggerEyeMove(){
+  eyeVel=Math.min(1.5,eyeVel+1);eyeDir*=-1;
+  eyeBtn.classList.add('flash');setTimeout(function(){eyeBtn.classList.remove('flash')},150);
+}
+eyeBtn.addEventListener('click',triggerEyeMove);
+document.addEventListener('keydown',function(e){if(e.code==='Space'&&!e.repeat){e.preventDefault();triggerEyeMove()}});
+
+(function(){
+  var el=document.getElementById('scr');
+  var active=false,x0,y0,s0,g0;
+  function dn(e){
+    active=true;var pt=e.touches?e.touches[0]:e;
+    x0=pt.clientX;y0=pt.clientY;s0=sweep;g0=gain;e.preventDefault();
+  }
+  function mv(e){
+    if(!active)return;var pt=e.touches?e.touches[0]:e;
+    var rect=el.getBoundingClientRect();
+    var dx=pt.clientX-x0,dy=pt.clientY-y0;
+    sweep=Math.max(-4,Math.min(4,s0+(dx/rect.width)*8));
+    var ng=Math.round(Math.max(10,Math.min(95,g0-(dy/rect.height)*70)));
+    if(ng!==gain){gain=ng;gainEl.value=gain;gDisp.innerHTML=gain+'<i>dB</i>';updateHint()}
+    e.preventDefault();
+  }
+  function up(){active=false}
+  el.addEventListener('mousedown',dn);
+  el.addEventListener('touchstart',dn,{passive:false});
+  window.addEventListener('mousemove',mv);
+  window.addEventListener('touchmove',mv,{passive:false});
+  window.addEventListener('mouseup',up);
+  window.addEventListener('touchend',up);
+})();
+
+function frame(ts){t=ts*.001;updateEyePhysics();render();requestAnimationFrame(frame)}
+updateHint();updateTeach();requestAnimationFrame(frame);
+})();
+</script>
