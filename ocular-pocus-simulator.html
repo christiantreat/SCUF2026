@@ -101,6 +101,17 @@
   .refs li strong{color:var(--bright);font-size:10px}
   .refs a{color:var(--accent);text-decoration:none;font-size:9px;word-break:break-all}
   .refs a:hover{text-decoration:underline}
+  .projects{width:100%;max-width:660px;padding:3px 12px}
+  .projects-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;
+  }
+  .projects-box h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:var(--accent);margin-bottom:6px}
+  .projects-box .proj{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+  .projects-box .proj a{
+    color:var(--bright);font-size:11px;font-weight:600;text-decoration:none;
+  }
+  .projects-box .proj a:hover{text-decoration:underline;color:var(--accent)}
+  .projects-box .proj span{font-size:10px;color:var(--muted)}
   .foot{width:100%;max-width:660px;text-align:center;padding:6px 12px 22px}
   .foot span{
     display:inline-block;font-size:10px;color:var(--muted);
@@ -164,6 +175,16 @@
       <li><strong>Core EM</strong> &mdash; Ocular US overview, retinal vs vitreous detachment, ONSD, CRAO.<br><a href="https://coreem.net/core/ocular-ultrasound/" target="_blank" rel="noopener">coreem.net/core/ocular-ultrasound</a></li>
     </ol>
   </details>
+</div>
+
+<div class="projects">
+  <div class="projects-box">
+    <h3>Conference Projects</h3>
+    <div class="proj"><a href="https://github.com/christiantreat/sonogames" target="_blank" rel="noopener">SonoGames</a><span>&mdash; Ultrasound gamification for education</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/sonowolf" target="_blank" rel="noopener">SonoWolf</a><span>&mdash; Social deduction game for US interpretation</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/ultraclean" target="_blank" rel="noopener">UltraClean</a><span>&mdash; Ultrasound image optimization tools</span></div>
+    <div class="proj"><a href="https://github.com/christiantreat/zine" target="_blank" rel="noopener">Zine</a><span>&mdash; Visual learning zines for point-of-care ultrasound</span></div>
+  </div>
 </div>
 
 <div class="foot">
@@ -364,7 +385,6 @@ function drawRD(g,gn,tt,macOn){
   var dAng=DISC_ANG;
   var oraN=Math.PI*.87;
   var oraT=Math.PI*.13;
-  var tEnd=macOn?MAC_ANG+.08:oraT;
   var maxLift=r*.3;
   var N=40;
 
@@ -387,8 +407,8 @@ function drawRD(g,gn,tt,macOn){
     ctx.stroke();
   }
 
-  arm(dAng,oraN,true);
-  arm(dAng,tEnd,!macOn);
+  if(macOn)arm(dAng,oraN,true);
+  else arm(dAng,oraT,true);
   ctx.restore();
 
   var ddx=cx+Math.cos(dAng)*(r+1),ddy=cy+Math.sin(dAng)*(r+1);
@@ -442,7 +462,7 @@ function drawLabels(g,md,gn){
   }
   if(md==='rd-on'){
     ctx.fillStyle='rgba('+Math.floor(190+gn*30)+',60,60,.55)';
-    ctx.fillText('DETACHED RETINA',cx-r*.15,cy-r*.28);
+    ctx.fillText('DETACHED RETINA',cx-r*.35,cy-r*.1);
     ctx.font='bold 8px '+MONO;
     ctx.fillStyle='rgba(220,70,70,.65)';ctx.fillText('EMERGENCY',cx,cy+r+28);
     ctx.font='7px '+MONO;ctx.fillText('MAC-ON: HOURS TO REPAIR',cx,cy+r+39);
@@ -450,7 +470,7 @@ function drawLabels(g,md,gn){
   }
   if(md==='rd-off'){
     ctx.fillStyle='rgba(40,'+Math.floor(140+gn*30)+','+Math.floor(170+gn*40)+',.5)';
-    ctx.fillText('DETACHED RETINA',cx,cy-r*.28);
+    ctx.fillText('DETACHED RETINA',cx+r*.35,cy-r*.1);
     ctx.font='bold 8px '+MONO;
     ctx.fillStyle='rgba(46,168,204,.65)';ctx.fillText('URGENT',cx,cy+r+28);
     ctx.font='7px '+MONO;ctx.fillText('MAC-OFF: 24-72H REPAIR',cx,cy+r+39);
@@ -557,16 +577,16 @@ var hints={
     [999,'Dense hemorrhage. 67% of VH have an associated retinal tear — always check for RD.']
   ],
   'rd-on':[
-    [26,'EMERGENCY: Mac-on RD. Membrane visible even at low gain (97-100% sensitivity).'],
-    [46,'Note: temporal arm stops before the macula (green dot). Macula still attached.'],
+    [26,'EMERGENCY: Mac-on RD. Nasal detachment visible even at low gain (97-100% sensitivity).'],
+    [46,'Detachment on nasal side of disc — macula (green dot) still attached on temporal side.'],
     [70,'Gain-independent — same membrane at all gains. Emergent repair within hours.'],
     [999,'Mac-on: repair within hours to save central vision. Patient may still see well.']
   ],
   'rd-off':[
-    [26,'URGENT: Mac-off RD. Membrane extends past macula at all gain levels.'],
-    [46,'Full V-shape. Membrane passes the macula position (red dot = detached).'],
+    [26,'URGENT: Mac-off RD. Temporal detachment extends past macula at all gain levels.'],
+    [46,'Detachment on temporal side of disc — passes the macula position (red dot = detached).'],
     [70,'Central vision already compromised. Urgent repair within 24-72 hours.'],
-    [999,'Gain-independent: same V-shape, same brightness. Screen for concurrent VH at high gain.']
+    [999,'Gain-independent: same membrane, same brightness. Screen for concurrent VH at high gain.']
   ]
 };
 var hColors={normal:'#5a9a6a',vh:'#c09030','rd-on':'#d44a4a','rd-off':'#4a9aba'};
@@ -604,10 +624,10 @@ var teachData={
     title:'RD Mac-On — Surgical Emergency',color:'var(--rdem)',
     items:[
       'Macula STILL ATTACHED — emergent repair within hours to preserve central vision (JETem)',
-      'Detachment does NOT extend past macula (3 mm temporal to disc)',
+      'Detachment on nasal side of disc — does NOT extend past macula (3 mm temporal to disc)',
       'More subtle presentation: patient may still have relatively good central vision',
       'Higher risk of missed diagnosis — use ultrasound to confirm suspected RD',
-      'Thick hyperechoic membrane tethered at optic disc + ora serrata (gain-independent)',
+      'Thick hyperechoic membrane tethered at optic disc, curving along globe wall (gain-independent)',
       'Limited aftermovement on kinetic exam — stiffer than VH, stays anchored at disc'
     ]
   },
@@ -615,8 +635,8 @@ var teachData={
     title:'RD Mac-Off — Urgent (24-72h)',color:'var(--rd)',
     items:[
       'Macula DETACHED — central vision already compromised. Urgent repair 24-72 hours (JETem)',
-      'Membrane extends past the macula, often classic V-shape or funnel',
-      'V-shape: tethered at optic disc (posteriorly) and ora serrata (anteriorly)',
+      'Membrane on temporal side of disc — extends past macula position',
+      'Tethered at optic disc, curving along globe wall toward ora serrata (anteriorly)',
       'Gain-independent: 97-100% sensitivity at ALL gain levels (POCUS Atlas, Wenger 2023)',
       'Chronic RD: evolves V → Y/T → funnel shape, membrane thickens, aftermovement decreases',
       'Always screen at high gain to check for concurrent vitreous hemorrhage'
