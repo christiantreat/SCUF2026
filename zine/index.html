@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Page Zine Maker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #e8dcc4;
+            color: #2d2d2d;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            background-color: #f5ead6;
+            border: 3px solid #5d4e37;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 4px 4px 0px #5d4e37;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .btn {
+            background-color: #5d4e37;
+            color: #f5ead6;
+            border: 2px solid #2d2d2d;
+            padding: 12px 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0px #2d2d2d;
+            transition: all 0.1s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #2d2d2d;
+        }
+
+        .btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #2d2d2d;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background-color: #8b4513;
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .panel {
+            background-color: #f5ead6;
+            border: 3px solid #5d4e37;
+            padding: 30px;
+            box-shadow: 4px 4px 0px #5d4e37;
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #5d4e37;
+            padding-bottom: 10px;
+        }
+
+        .panel h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .page-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .page-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .page-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .page-btn {
+            background-color: #e8dcc4;
+            border: 2px solid #5d4e37;
+            padding: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .page-btn:hover {
+            background-color: #d4c4a8;
+        }
+
+        .page-btn.active {
+            background-color: #5d4e37;
+            color: #f5ead6;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .hint {
+            font-size: 11px;
+            font-style: italic;
+            color: #5d4e37;
+            margin-top: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 2px solid #5d4e37;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2d2d2d;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #pageCSS {
+            min-height: 150px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            background-color: #fffef7;
+            border: 2px solid #5d4e37;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #2d2d2d;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #5d4e37;
+            padding: 20px;
+            text-align: center;
+            background-color: #fffef7;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .image-upload-area:hover {
+            background-color: #f5ead6;
+            border-color: #2d2d2d;
+        }
+
+        .image-upload-area.has-image {
+            border-style: solid;
+        }
+
+        .image-thumbnail {
+            max-width: 100%;
+            max-height: 150px;
+            border: 3px solid #5d4e37;
+            box-shadow: 2px 2px 0px #2d2d2d;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .live-preview-container {
+            border: 3px solid #5d4e37;
+            background-color: white;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+
+        .live-preview {
+            width: 100%;
+            height: 400px;
+            padding: 20px;
+            overflow: auto;
+            background: white;
+            font-family: 'Courier New', Courier, monospace;
+            color: black;
+            font-size: 12px;
+        }
+
+        .live-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .preview-label {
+            font-size: 11px;
+            font-style: italic;
+            color: #5d4e37;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Overflow warning styles */
+        .live-preview-container.overflowing {
+            border: 5px solid #ff0000 !important;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); }
+        }
+
+        .overflow-warning {
+            background: #ff0000;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+            animation: blink 1s infinite;
+        }
+
+        .overflow-warning.visible {
+            display: block;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.7; }
+        }
+
+
+
+        #pdfRenderContainer {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            background: white;
+            width: 1056px;
+            height: 816px;
+        }
+
+        .pdf-sheet {
+            width: 1056px;
+            height: 816px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-row {
+            display: flex;
+            height: 408px;
+            width: 1056px;
+        }
+
+        .pdf-page {
+            width: 264px;
+            height: 408px;
+            padding: 20px;
+            overflow: hidden;
+            background: white;
+            font-family: 'Courier New', Courier, monospace;
+            color: black;
+            font-size: 12px;
+        }
+
+        .pdf-page.rotated {
+            transform: rotate(180deg);
+        }
+
+        .pdf-page img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media print {
+            body { 
+                margin: 0; 
+                padding: 0; 
+            }
+            .pdf-page { 
+                page-break-after: always;
+                width: 11in; 
+                height: 8.5in;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⊞ 8-Page Zine Maker ⊞</h1>
+            <button class="btn" onclick="saveProject()">💾 Save Project</button>
+            <button class="btn" onclick="document.getElementById('loadProjectFile').click()">📂 Load Project</button>
+            <button class="btn" onclick="generatePDF()" id="downloadBtn">⬇ Download PDF</button>
+            <input type="file" id="loadProjectFile" accept=".zine" style="display: none;" onchange="loadProject(event)">
+        </div>
+
+        <div class="editor-grid">
+            <div class="panel">
+                <h2>Select Page to Edit</h2>
+                <div class="page-grid" id="pageSelector"></div>
+
+                <h3>Edit Page <span id="currentPageNum">1</span></h3>
+
+                <div class="form-group">
+                    <label>HTML Content: <span id="charCount" style="color: #888; float: right; font-size: 10px; text-transform: none; letter-spacing: 0;">0 characters</span></label>
+                    <textarea id="pageHTML" oninput="updateCurrentPage()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom CSS for This Page:</label>
+                    <textarea id="pageCSS" oninput="updateCurrentPage()" placeholder="/* Style the auto-inserted image */
+.auto-image {
+  max-width: 50%;
+  float: left;
+  margin-right: 15px;
+}
+
+/* Or hide it completely */
+.auto-image {
+  display: none;
+}
+
+/* Style other elements */
+h1 {
+  color: #ff6b6b;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Image:</label>
+                    <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageUpload').click()">
+                        <div id="imagePreview"></div>
+                        <p id="uploadPrompt">Click to upload image</p>
+                    </div>
+                    <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
+                    <button class="btn btn-small btn-danger" id="removeImageBtn" onclick="removeImage()" style="display: none;">Remove Image</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Live Preview</h2>
+                <div class="live-preview-container" id="previewContainer">
+                    <div id="livePreview" class="live-preview"></div>
+                </div>
+                <div class="overflow-warning" id="overflowWarning">
+                    ⚠️ WARNING: Content is too long and will be cut off in the PDF! ⚠️
+                </div>
+                </div>
+        </div>
+    </div>
+
+    <div id="pdfRenderContainer">
+        <div class="pdf-sheet" id="pdfSheet">
+            <div class="pdf-row">
+                <div class="pdf-page rotated" data-page="5"></div>
+                <div class="pdf-page rotated" data-page="4"></div>
+                <div class="pdf-page rotated" data-page="3"></div>
+                <div class="pdf-page rotated" data-page="2"></div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-page" data-page="6"></div>
+                <div class="pdf-page" data-page="7"></div>
+                <div class="pdf-page" data-page="8"></div>
+                <div class="pdf-page" data-page="1"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jsPDF = window.jspdf.jsPDF;
+
+        const pages = {
+            1: { html: '<h1 style="text-align: center;">MY ZINE TITLE</h1>\n<p style="text-align: center;">By Your Name</p>', css: '', image: null },
+            2: { html: '<h2>Page 2</h2>\n<p>Write your content here with <strong>bold</strong> and <em>italic</em> text!</p>', css: '', image: null },
+            3: { html: '<h2>Page 3</h2>\n<p>Your content here...</p>', css: '', image: null },
+            4: { html: '<h2>Page 4</h2>\n<p>Your content here...</p>', css: '', image: null },
+            5: { html: '<h2>Page 5</h2>\n<p>Your content here...</p>', css: '', image: null },
+            6: { html: '<h2>Page 6</h2>\n<p>Your content here...</p>', css: '', image: null },
+            7: { html: '<h2>Page 7</h2>\n<p>Your content here...</p>', css: '', image: null },
+            8: { html: '<h2 style="text-align: center;">THE END</h2>', css: '', image: null }
+        };
+
+        let currentPage = 1;
+
+        function initPageSelector() {
+            const selector = document.getElementById('pageSelector');
+            
+            const coverRow = document.createElement('div');
+            coverRow.className = 'page-row single';
+            const coverBtn = document.createElement('button');
+            coverBtn.className = 'page-btn active';
+            coverBtn.textContent = 'Cover (Page 1)';
+            coverBtn.onclick = () => selectPage(1);
+            coverRow.appendChild(coverBtn);
+            selector.appendChild(coverRow);
+            
+            const row23 = document.createElement('div');
+            row23.className = 'page-row';
+            for (let i = 2; i <= 3; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.textContent = 'Page ' + i;
+                btn.onclick = () => selectPage(i);
+                row23.appendChild(btn);
+            }
+            selector.appendChild(row23);
+            
+            const row45 = document.createElement('div');
+            row45.className = 'page-row';
+            for (let i = 4; i <= 5; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.textContent = 'Page ' + i;
+                btn.onclick = () => selectPage(i);
+                row45.appendChild(btn);
+            }
+            selector.appendChild(row45);
+            
+            const row67 = document.createElement('div');
+            row67.className = 'page-row';
+            for (let i = 6; i <= 7; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.textContent = 'Page ' + i;
+                btn.onclick = () => selectPage(i);
+                row67.appendChild(btn);
+            }
+            selector.appendChild(row67);
+            
+            const backRow = document.createElement('div');
+            backRow.className = 'page-row single';
+            const backBtn = document.createElement('button');
+            backBtn.className = 'page-btn';
+            backBtn.textContent = 'Back (Page 8)';
+            backBtn.onclick = () => selectPage(8);
+            backRow.appendChild(backBtn);
+            selector.appendChild(backRow);
+        }
+
+        function selectPage(pageNum) {
+            currentPage = pageNum;
+            
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const buttons = document.querySelectorAll('.page-btn');
+            const pageOrder = [1, 2, 3, 4, 5, 6, 7, 8];
+            const buttonIndex = pageOrder.indexOf(pageNum);
+            if (buttonIndex !== -1 && buttons[buttonIndex]) {
+                buttons[buttonIndex].classList.add('active');
+            }
+
+            const page = pages[pageNum];
+            document.getElementById('pageHTML').value = page.html;
+            document.getElementById('pageCSS').value = page.css || '';
+            document.getElementById('currentPageNum').textContent = pageNum;
+            document.getElementById('previewPageNum').textContent = pageNum;
+
+            updateCharCount();
+            updateImagePreview();
+            updateLivePreview();
+        }
+
+        function updateCharCount() {
+            const page = pages[currentPage];
+            const charCount = page.html.length;
+            const charCountElement = document.getElementById('charCount');
+            charCountElement.textContent = charCount + ' characters';
+            
+            if (charCount > 1200) {
+                charCountElement.style.color = '#ff0000';
+                charCountElement.style.fontWeight = 'bold';
+            } else if (charCount > 900) {
+                charCountElement.style.color = '#ff8800';
+                charCountElement.style.fontWeight = 'bold';
+            } else {
+                charCountElement.style.color = '#888';
+                charCountElement.style.fontWeight = 'normal';
+            }
+        }
+
+        function updateImagePreview() {
+            const page = pages[currentPage];
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadPrompt = document.getElementById('uploadPrompt');
+            const removeBtn = document.getElementById('removeImageBtn');
+            const uploadArea = document.getElementById('imageUploadArea');
+
+            if (page.image) {
+                imagePreview.innerHTML = '<img src="' + page.image + '" class="image-thumbnail" alt="Preview">';
+                uploadPrompt.style.display = 'none';
+                removeBtn.style.display = 'inline-block';
+                uploadArea.classList.add('has-image');
+            } else {
+                imagePreview.innerHTML = '';
+                uploadPrompt.style.display = 'block';
+                uploadPrompt.textContent = 'Click to upload image';
+                removeBtn.style.display = 'none';
+                uploadArea.classList.remove('has-image');
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    pages[currentPage].image = e.target.result;
+                    updateImagePreview();
+                    updateLivePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            pages[currentPage].image = null;
+            document.getElementById('imageUpload').value = '';
+            updateImagePreview();
+            updateLivePreview();
+        }
+
+        function updateCurrentPage() {
+            pages[currentPage].html = document.getElementById('pageHTML').value;
+            pages[currentPage].css = document.getElementById('pageCSS').value;
+            
+            updateCharCount();
+            updateLivePreview();
+            updatePDFPages();
+        }
+
+        function updateLivePreview() {
+            const preview = document.getElementById('livePreview');
+            const page = pages[currentPage];
+            
+            // Remove old custom style tag
+            const oldStyle = document.getElementById('page-custom-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+            
+            // Add new custom CSS if present
+            if (page.css && page.css.trim() !== '') {
+                const style = document.createElement('style');
+                style.id = 'page-custom-style';
+                style.textContent = page.css;
+                document.head.appendChild(style);
+            }
+            
+            // Clear preview
+            preview.innerHTML = '';
+            
+            // Create content wrapper
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = page.html;
+            
+            // Auto-display image at top if it exists (can be hidden/styled with CSS)
+            if (page.image) {
+                const img = document.createElement('img');
+                img.src = page.image;
+                img.className = 'auto-image';
+                img.style.display = 'block';
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.margin = '0 auto 10px auto';
+                
+                preview.appendChild(img);
+            }
+            
+            preview.appendChild(contentDiv);
+            
+            // Check for overflow after content is rendered
+            setTimeout(checkOverflow, 100);
+        }
+
+        function checkOverflow() {
+            const preview = document.getElementById('livePreview');
+            const container = document.getElementById('previewContainer');
+            const warning = document.getElementById('overflowWarning');
+            
+            // Check if content is overflowing
+            const isOverflowing = preview.scrollHeight > preview.clientHeight;
+            
+            if (isOverflowing) {
+                container.classList.add('overflowing');
+                warning.classList.add('visible');
+            } else {
+                container.classList.remove('overflowing');
+                warning.classList.remove('visible');
+            }
+        }
+
+        function updatePDFPages() {
+            // Clear any existing custom style tags in PDF pages
+            document.querySelectorAll('.pdf-page style').forEach(style => style.remove());
+            
+            // Update hidden PDF render
+            document.querySelectorAll('.pdf-page').forEach(elem => {
+                const pageNum = parseInt(elem.getAttribute('data-page'));
+                const page = pages[pageNum];
+                
+                // Clear existing content
+                elem.innerHTML = '';
+                
+                // Apply custom CSS via style tag inside the page
+                if (page.css && page.css.trim() !== '') {
+                    const style = document.createElement('style');
+                    style.textContent = page.css;
+                    elem.appendChild(style);
+                }
+                
+                // Create content wrapper
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = page.html;
+                
+                // Auto-display image at top if it exists (can be hidden/styled with CSS)
+                if (page.image) {
+                    const img = document.createElement('img');
+                    img.src = page.image;
+                    img.className = 'auto-image';
+                    img.style.display = 'block';
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                    img.style.margin = '0 auto 10px auto';
+                    
+                    elem.appendChild(img);
+                }
+                
+                elem.appendChild(contentDiv);
+            });
+        }
+
+        async function generatePDF() {
+            // Prompt user for filename
+            let filename = prompt('Save PDF as:', 'my-zine.pdf');
+            
+            if (!filename) {
+                return; // User cancelled
+            }
+            
+            // Ensure .pdf extension
+            if (!filename.endsWith('.pdf')) {
+                filename += '.pdf';
+            }
+            
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = 'Generating...';
+
+            try {
+                updatePDFPages();
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const element = document.getElementById('pdfSheet');
+                
+                // High resolution rendering: scale 6 means 6x pixel density
+                // This produces very crisp, high-quality PDFs
+                const canvas = await html2canvas(element, {
+                    scale: 6,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: 1056,
+                    height: 816,
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [1056, 816],
+                    compress: false  // Disable compression for maximum quality
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Add image at full quality with no compression
+                pdf.addImage(imgData, 'PNG', 0, 0, 1056, 816, undefined, 'NONE');
+
+                pdf.save(filename);
+
+                downloadBtn.textContent = '⬇ Download PDF';
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+                downloadBtn.textContent = '⬇ Download PDF';
+            } finally {
+                downloadBtn.disabled = false;
+            }
+        }
+
+        function saveProject() {
+            // Prompt user for filename
+            let filename = prompt('Save project as:', 'my-zine-project.zine');
+            
+            if (!filename) {
+                return; // User cancelled
+            }
+            
+            // Ensure .zine extension
+            if (!filename.endsWith('.zine')) {
+                filename += '.zine';
+            }
+            
+            const projectData = {
+                version: '2.0',
+                pages: pages,
+                savedDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = filename;
+            link.click();
+            
+            URL.revokeObjectURL(link.href);
+        }
+
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    
+                    if (!projectData.pages) {
+                        alert('Invalid project file format.');
+                        return;
+                    }
+
+                    // Load all pages
+                    Object.keys(projectData.pages).forEach(pageNum => {
+                        const loadedPage = projectData.pages[pageNum];
+                        
+                        // Handle legacy markdown format (convert to HTML if needed)
+                        if (loadedPage.text !== undefined) {
+                            pages[pageNum].html = '<p>' + loadedPage.text.replace(/\n\n/g, '</p>\n<p>') + '</p>';
+                            pages[pageNum].css = loadedPage.customCSS || '';
+                            pages[pageNum].image = loadedPage.image || null;
+                        } else {
+                            // New format
+                            pages[pageNum] = {
+                                html: loadedPage.html || '',
+                                css: loadedPage.css || '',
+                                image: loadedPage.image || null
+                            };
+                        }
+                    });
+
+                    // Refresh the current page view
+                    selectPage(currentPage);
+                    updateLivePreview();
+                    updatePDFPages();
+                    
+                    alert('Project loaded successfully!');
+                } catch (error) {
+                    console.error('Error loading project:', error);
+                    alert('Error loading project file. Please make sure it\'s a valid .zine file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input so the same file can be loaded again
+            event.target.value = '';
+        }
+
+        initPageSelector();
+        selectPage(1);
+        updateLivePreview();
+        updatePDFPages();
+    </script>
+</body>
+</html>

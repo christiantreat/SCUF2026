@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="The Sono Wolf">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#990000" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Stony Brook ultrasound education portal: protocols, anatomy, and teaching videos.">
+    <title>The Sono Wolf - Stony Brook Ultrasound Portal</title>
+    <style>
+        :root {
+            --bg: #BEBEBE;
+            --bg-accent-1: #39BFC9;
+            --bg-accent-2: #990000;
+            --panel: #828282;
+            --panel-soft: #BEBEBE;
+            --ink: #000000;
+            --ink-muted: #4B4B4B;
+            --tag-bg: #39BFC9;
+            --tag-ink: #000000;
+            --count-bg: #990000;
+            --count-ink: #BEBEBE;
+            --shadow: #4B4B4B;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --bg-accent-1: #39BFC9;
+                --bg-accent-2: #cc2a2a;
+                --panel: #2e2e2e;
+                --panel-soft: #3a3a3a;
+                --ink: #e8e8e8;
+                --ink-muted: #a8a8a8;
+                --tag-bg: #39BFC9;
+                --tag-ink: #000000;
+                --count-bg: #cc2a2a;
+                --count-ink: #f0f0f0;
+                --shadow: #000000;
+            }
+        }
+
+        [data-theme="light"] {
+            --bg: #BEBEBE;
+            --bg-accent-2: #990000;
+            --panel: #828282;
+            --panel-soft: #BEBEBE;
+            --ink: #000000;
+            --ink-muted: #4B4B4B;
+            --count-bg: #990000;
+            --count-ink: #BEBEBE;
+            --shadow: #4B4B4B;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --bg-accent-2: #cc2a2a;
+            --panel: #2e2e2e;
+            --panel-soft: #3a3a3a;
+            --ink: #e8e8e8;
+            --ink-muted: #a8a8a8;
+            --count-bg: #cc2a2a;
+            --count-ink: #f0f0f0;
+            --shadow: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+            height: -webkit-fill-available;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            color: var(--ink);
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 25% 25%, var(--bg-accent-1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, var(--bg-accent-2) 1px, transparent 1px);
+            background-size: 50px 50px;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--bg-accent-1);
+            outline-offset: 2px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding:
+                max(env(safe-area-inset-top), 20px)
+                max(env(safe-area-inset-right), 20px)
+                max(env(safe-area-inset-bottom), 20px)
+                max(env(safe-area-inset-left), 20px);
+        }
+
+        input, select, textarea, button {
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: var(--bg-accent-1);
+            padding: 20px;
+            border: 4px solid var(--ink);
+            border-style: outset;
+            box-shadow: 4px 4px 0px var(--shadow);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--panel-soft);
+            border: 2px solid var(--ink);
+            border-style: outset;
+            color: var(--ink);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 6px 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-height: 32px;
+            min-width: 64px;
+        }
+        .theme-toggle:active { border-style: inset; }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--bg-accent-2);
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px var(--ink);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--ink);
+            font-weight: bold;
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 25% 25%, var(--bg-accent-1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, var(--bg-accent-2) 1px, transparent 1px);
+            background-size: 50px 50px;
+            padding: 10px 0 14px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--ink-muted);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 36px 10px 14px;
+            font-size: 16px;
+            border: 3px solid var(--ink);
+            border-style: inset;
+            background: var(--panel-soft);
+            color: var(--ink);
+            outline: none;
+            -webkit-appearance: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .search-box:focus { background: var(--bg-accent-1); color: var(--ink); }
+
+        .search-clear {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: 0;
+            color: var(--ink);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 8px;
+            display: none;
+        }
+        .search-box:not(:placeholder-shown) + .search-clear { display: block; }
+
+        .toolbar-btn {
+            background: var(--panel-soft);
+            border: 3px solid var(--ink);
+            border-style: outset;
+            color: var(--ink);
+            font-weight: bold;
+            font-size: 12px;
+            padding: 0 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+        .toolbar-btn:hover { background: var(--bg-accent-1); }
+        .toolbar-btn:active { border-style: inset; }
+
+        .search-status {
+            text-align: center;
+            font-size: 12px;
+            color: var(--ink);
+            margin-top: 8px;
+            min-height: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: var(--panel);
+            border: 3px solid var(--ink);
+            border-style: outset;
+            box-shadow: 3px 3px 0px var(--shadow);
+            /* native <details> */
+        }
+
+        .category-header {
+            background: var(--panel);
+            padding: 18px;
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+            border-bottom: 3px solid var(--ink);
+            scroll-margin-top: 120px;
+        }
+        .category-header::-webkit-details-marker { display: none; }
+        .category-header::marker { display: none; content: ''; }
+        .category-header:hover { background: var(--bg-accent-1); }
+        .category-header:active { border-style: inset; }
+
+        .category-title {
+            font-size: 0.95rem;
+            color: var(--bg-accent-2);
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .title-text { overflow: hidden; text-overflow: ellipsis; }
+
+        .collapse-indicator {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--ink);
+            width: 20px;
+            text-align: center;
+        }
+        details[open] > .category-header .collapse-indicator::before { content: '−'; }
+        details:not([open]) > .category-header .collapse-indicator::before { content: '+'; }
+
+        .category-content {
+            padding: 18px;
+        }
+
+        .category-subheader {
+            font-family: 'Courier New', monospace;
+            color: var(--bg-accent-2);
+            font-size: 0.9rem;
+            margin: 15px 0 8px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--ink-muted);
+            font-weight: bold;
+        }
+        .category-subheader:first-child { margin-top: 0; }
+
+        .video-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--ink);
+            background: var(--panel-soft);
+            margin-bottom: 6px;
+            padding: 10px 12px;
+            border: 2px solid var(--ink);
+            border-style: outset;
+            font-weight: bold;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            font-size: 12px;
+            min-height: 44px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .video-link:hover, .video-link:active, .video-link:focus {
+            background: var(--bg-accent-1);
+            border-style: inset;
+            color: var(--ink);
+        }
+
+        .link-tag {
+            display: inline-block;
+            background: var(--tag-bg);
+            color: var(--tag-ink);
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 2px 5px;
+            border: 1px solid var(--ink);
+            text-transform: uppercase;
+            flex-shrink: 0;
+            min-width: 48px;
+            text-align: center;
+        }
+        .video-link[data-type="pdf"] .link-tag { background: #ffd24a; }
+        .video-link[data-type="img"] .link-tag { background: #c49cff; }
+        .video-link[data-type="article"] .link-tag { background: #ffaa5c; }
+        .video-link[data-type="tool"] .link-tag { background: #7fff9a; }
+        .video-link[data-type="video"] .link-tag { background: #ff7b9c; }
+
+        .link-text { flex: 1; }
+
+        .external-glyph {
+            font-size: 10px;
+            color: var(--ink-muted);
+            flex-shrink: 0;
+        }
+
+        .video-count {
+            background: var(--count-bg);
+            color: var(--count-ink);
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border: 1px solid var(--ink);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .hidden { display: none !important; }
+
+        mark {
+            background: var(--bg-accent-1);
+            color: var(--ink);
+            padding: 0 2px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--panel);
+            border: 3px solid var(--ink);
+            border-style: inset;
+            color: var(--ink);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            grid-column: 1 / -1;
+        }
+
+        .back-to-top {
+            position: fixed;
+            right: 16px;
+            bottom: max(16px, env(safe-area-inset-bottom));
+            background: var(--bg-accent-1);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-style: outset;
+            box-shadow: 3px 3px 0px var(--shadow);
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            display: none;
+            z-index: 20;
+        }
+        .back-to-top.visible { display: block; }
+        .back-to-top:active { border-style: inset; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--panel);
+            border: 2px solid var(--ink);
+            border-style: inset;
+            margin: 20px 0;
+            font-size: 0.8rem;
+            color: var(--ink);
+        }
+        footer a { color: var(--bg-accent-2); font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .categories-grid { grid-template-columns: 1fr; gap: 15px; }
+            h1 { font-size: 1.6rem; }
+            .category-header { padding: 15px; }
+            .category-content { padding: 15px; }
+            .container { padding: max(env(safe-area-inset-top), 10px) 15px max(env(safe-area-inset-bottom), 10px) 15px; }
+            .video-link { font-size: 11px; }
+            .theme-toggle { top: 8px; right: 8px; font-size: 10px; padding: 4px 8px; min-height: 28px; }
+            h1 { padding-right: 70px; padding-left: 70px; }
+        }
+
+        @media (min-width: 860px) {
+            h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1.1rem; }
+        }
+        @media (min-width: 1240px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark</button>
+            <h1>The Sono Wolf</h1>
+            <p class="subtitle">An Ultrasound Education Portal</p>
+        </header>
+
+        <div class="toolbar" role="search">
+            <div class="search-row">
+                <div class="search-wrap">
+                    <label for="searchBox" class="visually-hidden" style="position:absolute;left:-9999px;">Search</label>
+                    <input type="search" class="search-box" placeholder="Search topics… (press /)" id="searchBox" autocomplete="off" spellcheck="false">
+                    <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+                </div>
+                <button type="button" class="toolbar-btn" id="toggleAllBtn" aria-pressed="false">Expand All</button>
+            </div>
+            <div class="search-status" id="searchStatus" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="categories-grid" id="categoriesGrid">
+            <details class="category-card" data-category="basics" id="cat-basics">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Basics</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/knobology/" class="video-link" target="_blank" rel="noopener">Knobology</a>
+                    <a href="https://coreultrasound.com/basic_physics/" class="video-link" target="_blank" rel="noopener">Basic Ultrasound Physics</a>
+                    <a href="https://coreultrasound.com/artifacts_1/" class="video-link" target="_blank" rel="noopener">Ultrasound Artifacts, Part 1</a>
+                    <a href="https://coreultrasound.com/artifacts_2/" class="video-link" target="_blank" rel="noopener">Ultrasound Artifacts, Part 2</a>
+                    <a href="https://coreultrasound.com/5ms_machinedecon/" class="video-link" target="_blank" rel="noopener">Machine Decontamination</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="cardiac" id="cat-cardiac">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Cardiac</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://img.grepmed.com/uploads/1464/orientations-atlas-table-anatomy-cardiology-84-original.jpeg" class="video-link" target="_blank" rel="noopener">Labeled Anatomy</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.showmethepocus.com/planes-and-cardiac-windows" class="video-link" target="_blank" rel="noopener">Cardiac Windows</a>
+                    <a href="https://onlinelibrary.wiley.com/doi/epdf/10.1111/acem.12652" class="video-link" target="_blank" rel="noopener">5 E's Cardiac Ultrasound Article</a>
+                    <a href="#" class="video-link" data-tool="fiveEs">5 E's Table</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://medchiefs.bsd.uchicago.edu/files/2014/11/IVCfluidresponsiveness.pdf" class="video-link" target="_blank" rel="noopener">IVC Collapsibility / Distensibility</a>
+                    <a href="https://www.totalem.org/uploads/8/1/8/8/81889406/wall-motion-abnormality_orig.gif" class="video-link" target="_blank" rel="noopener">Wall Motion Abnormalities</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/how-to-obtain-cardiac-windows/" class="video-link" target="_blank" rel="noopener">How to Obtain Cardiac Windows</a>
+                    <a href="https://coreultrasound.com/basic-cardiac-function/" class="video-link" target="_blank" rel="noopener">Basic Cardiac Function</a>
+                    <a href="https://coreultrasound.com/ivc/" class="video-link" target="_blank" rel="noopener">IVC</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="lung" id="cat-lung">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Lung</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://ars.els-cdn.com/content/image/1-s2.0-S0363018816301281-gr2_lrg.jpg" class="video-link" target="_blank" rel="noopener">Lung Anatomy Diagram</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://famus.org.uk/wp-content/uploads/sites/6/BLUE-protocol-schematic-1-1536x850.jpg" class="video-link" target="_blank" rel="noopener">BLUE Protocol</a>
+                    <a href="https://www.nysora.com/wp-content/uploads/2023/05/unnamed-3-1252x1536.jpg" class="video-link" target="_blank" rel="noopener">BLUE Protocol Findings</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://nephropocus.com/2019/12/03/the-shred-sign/" class="video-link" target="_blank" rel="noopener">The Shred Sign</a>
+                    <a href="https://nephropocus.com/2019/06/04/pleural-effusion-the-spine-sign/" class="video-link" target="_blank" rel="noopener">The Spine Sign</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/how-to-perform-a-pulmonary-exam/" class="video-link" target="_blank" rel="noopener">How to Perform a Pulmonary Exam</a>
+                    <a href="https://coreultrasound.com/b-lines/" class="video-link" target="_blank" rel="noopener">B-lines</a>
+                    <a href="https://coreultrasound.com/pneumothorax/" class="video-link" target="_blank" rel="noopener">Pneumothorax</a>
+                    <a href="https://coreultrasound.com/pleural-effusions-part-1/" class="video-link" target="_blank" rel="noopener">Pleural Effusion, Part 1</a>
+                    <a href="https://coreultrasound.com/pleural-effusions-part-2/" class="video-link" target="_blank" rel="noopener">Pleural Effusion, Part 2</a>
+                    <a href="https://coreultrasound.com/pneumonia/" class="video-link" target="_blank" rel="noopener">Pneumonia</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="protocols" id="cat-protocols">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Protocols</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Resources</h3>
+                    <a href="https://onlinelibrary.wiley.com/doi/10.1155/2012/503254" class="video-link" target="_blank" rel="noopener">RUSH Journal Article</a>
+                    <a href="#" class="video-link" data-tool="rush">RUSH Protocol Table</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/rush-exam/" class="video-link" target="_blank" rel="noopener">RUSH exam</a>
+                    <a href="https://coreultrasound.com/efast/" class="video-link" target="_blank" rel="noopener">EFAST exam</a>
+                    <a href="https://www.showmethepocus.com/five-standard-views-cardiac-ultrasound" class="video-link" target="_blank" rel="noopener">The 5 E's</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="genitourinary" id="cat-genitourinary">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Genitourinary</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1513457507178-SFIVJPQLRQEGAYB77BJA/ezgif.com-optimize.gif" class="video-link" target="_blank" rel="noopener">Normal Kidney</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1620334068751-MD57GRN1ME38057VB6I7/image-asset.gif" class="video-link" target="_blank" rel="noopener">Medullary Pyramids</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567931550278-ZAIHWANXIB23FZW1OI5U/LUQ-kid-zoom.gif" class="video-link" target="_blank" rel="noopener">LUQ Kidney (Colorized)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1522623393374-5JZLE6Y95IHORMR1UPJB/jarret-kidney-color.jpg" class="video-link" target="_blank" rel="noopener">Hydronephrosis Color Flow Comparison</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.pocus101.com/renal-ultrasound-made-easy-step-by-step-guide/#Step-by-Step_Renal_Ultrasound_Protocol" class="video-link" target="_blank" rel="noopener">Renal Ultrasound</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/bladder-volume-measurement/" class="video-link" target="_blank" rel="noopener">Bladder Volume Measurement</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="gastrointestinal" id="cat-gastrointestinal">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Gastrointestinal</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Normal Anatomy</h3>
+                    <a href="https://pocus101.b-cdn.net/wp-content/uploads/2020/10/Portal-Triad-Mickey-Mouse-Sign-Portal-Vein-CBD-Right-Hepatic-Artery-Hepatobiliary-Ultrasound-2-1024x715.png" class="video-link" target="_blank" rel="noopener">Portal Triad Mickey Mouse View</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/gallbladder/" class="video-link" target="_blank" rel="noopener">Gallbladder</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="reproductive" id="cat-reproductive">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Reproductive</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1534360939261-X1YWSS0Q9K2VVYS6AY4A/uterus+transverse.gif" class="video-link" target="_blank" rel="noopener">Transabdominal Uterus Transverse</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1513457847711-YZPG9CYPS1W2X7SY7L9U/ezgif.com-optimize+%281%29.gif" class="video-link" target="_blank" rel="noopener">Normal Ovaries</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1534360908899-SIWRDCRDVBNT411MZUO3/transabdominal+left+adnexa.gif" class="video-link" target="_blank" rel="noopener">Transabdominal Left Adnexa</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567931555994-EEJ1XNARVTT4HH3O6JA8/transabd-uterus-long-trimmed.gif" class="video-link" target="_blank" rel="noopener">Uterus Sagittal (Colorized)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567931544064-WK4F0T4AZMYQJWRQBQ8M/transabd-uterus-tv.gif" class="video-link" target="_blank" rel="noopener">Uterus Transverse (Colorized)</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/ob-gyn-scanning-technique-5ms/" class="video-link" target="_blank" rel="noopener">Basic Ob-Gyn Scanning Technique</a>
+                    <a href="https://coreultrasound.com/ntrauterine-pregnancy-assessment-5ms/" class="video-link" target="_blank" rel="noopener">Intrauterine Pregnancy Identification</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="vte venous thromboembolism dvt" id="cat-vte">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Venous Thromboembolism</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1620331118832-FW90ULSPN52C9Q47WM2L/image-asset.gif" class="video-link" target="_blank" rel="noopener">Venous Valves</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1604502808067-BI5A8FD3BXF79TZT8WNI/image-asset.gif" class="video-link" target="_blank" rel="noopener">IVC to RA — Longitudinal</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1601047200640-6EBKO2HR9MT5KMI1J0R9/image-asset.gif" class="video-link" target="_blank" rel="noopener">Subclavian Vein</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567930261152-69Q2INLJDU029ARQDEM7/popliteal-vasc-doppler.gif" class="video-link" target="_blank" rel="noopener">Popliteal Vasculature (Colorized)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567930258400-L55SNO46KDA67WUE8D2W/carotid.IJ.gif" class="video-link" target="_blank" rel="noopener">Carotid & IJ Doppler (Colorized)</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.pocus101.com/category/dvt/" class="video-link" target="_blank" rel="noopener">DVT Ultrasound Guide</a>
+                    <a href="https://pocus101.b-cdn.net/wp-content/uploads/2020/08/Deep-Vein-Thrombosis-DVT-Ultrasound-Pocket-Card-PDF.pdf" class="video-link" target="_blank" rel="noopener">DVT Pocket Card (PDF)</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://coreultrasound.com/dvt-ultrasound-episode-4-ultrasound-podcast-archive/" class="video-link" target="_blank" rel="noopener">DVT Ultrasound (Podcast Archive)</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/dvt/" class="video-link" target="_blank" rel="noopener">Deep Venous Thrombosis</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="aorta aaa aneurysm dissection" id="cat-aorta">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Aorta</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1736373873590-P9X402CTR7GUPQVKK54D/image-asset.gif" class="video-link" target="_blank" rel="noopener">Suprasternal View of the Aorta</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1736373592848-D1N96LW35T5TNA06QUIK/image-asset.gif" class="video-link" target="_blank" rel="noopener">Suprasternal View (Labeled)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1605901470140-767XW864Y2QQI4NAQ5Q1/image-asset.gif" class="video-link" target="_blank" rel="noopener">Normal Aortic Arch — Suprasternal</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.pocus101.com/aorta-ultrasound-made-easy-step-by-step-guide/" class="video-link" target="_blank" rel="noopener">Aorta Ultrasound Step-by-Step Guide</a>
+                    <a href="https://www.acep.org/sonoguide/basic/aorta" class="video-link" target="_blank" rel="noopener">ACEP SonoGuide — AAA</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://www.thepocusatlas.com/ea-aorta" class="video-link" target="_blank" rel="noopener">Aorta Evidence Atlas (Sens/Spec, LR)</a>
+                    <a href="https://coreultrasound.com/uotw-20/" class="video-link" target="_blank" rel="noopener">Case: AAA Repair Complication (UOTW #20)</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/aorta_cb/" class="video-link" target="_blank" rel="noopener">Aorta Clip Bank</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="ocular eye onsd retinal detachment" id="cat-ocular">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Ocular</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://www.coreultrasound.com/cb_ocular/" class="video-link" target="_blank" rel="noopener">Ocular Clip Bank</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.pocus101.com/ocular-ultrasound-made-easy-step-by-step-guide/" class="video-link" target="_blank" rel="noopener">Ocular Ultrasound Step-by-Step Guide</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://coreultrasound.com/vd-rd/" class="video-link" target="_blank" rel="noopener">Vitreous vs Retinal Detachment</a>
+                    <a href="https://coreultrasound.com/onsd/" class="video-link" target="_blank" rel="noopener">Optic Nerve Sheath Diameter (ICP)</a>
+                    <a href="https://coreultrasound.com/crao/" class="video-link" target="_blank" rel="noopener">Central Retinal Artery Occlusion</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/5minsono-ocular/" class="video-link" target="_blank" rel="noopener">5 Minute Sono — Ocular</a>
+                    <a href="https://coreultrasound.com/tag/ocular/" class="video-link" target="_blank" rel="noopener">All Ocular Content</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="soft tissue cellulitis abscess necrotizing" id="cat-soft-tissue">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Soft Tissue</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1612291344381-69Z9963EMAJTBJHUIIKA/image-asset.jpeg" class="video-link" target="_blank" rel="noopener">Normal MSK Sonoanatomy Layers</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1612291422235-99SW73A5NP4J69X0BPNM/ezgif.com-gif-maker+%289%29.gif" class="video-link" target="_blank" rel="noopener">Soft Tissue Layers (GIF)</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://coreultrasound.com/5ms-soft-tissue/" class="video-link" target="_blank" rel="noopener">5 Minute Sono — Soft Tissue</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://coreultrasound.com/cellulitis-vs-abscess/" class="video-link" target="_blank" rel="noopener">Cellulitis vs Abscess</a>
+                    <a href="https://coreultrasound.com/nsti/" class="video-link" target="_blank" rel="noopener">Necrotizing Soft Tissue Infections</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="bowel sbo appendicitis gi" id="cat-bowel">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Bowel</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://www.thepocusatlas.com/bowel" class="video-link" target="_blank" rel="noopener">Bowel Image Atlas</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://www.pocus101.com/abdominal-ultrasound-made-easy-step-by-step-guide/" class="video-link" target="_blank" rel="noopener">Abdominal Ultrasound Step-by-Step</a>
+                    <a href="https://coreultrasound.com/5ms-gi/" class="video-link" target="_blank" rel="noopener">5 Minute Sono — GI</a>
+
+                    <h3 class="category-subheader">Clinical Applications</h3>
+                    <a href="https://coreultrasound.com/small-bowel-obstruction/" class="video-link" target="_blank" rel="noopener">Small Bowel Obstruction</a>
+                    <a href="https://coreultrasound.com/appendicitis/" class="video-link" target="_blank" rel="noopener">Appendicitis</a>
+                    <a href="https://www.thepocusatlas.com/ea-bowel" class="video-link" target="_blank" rel="noopener">Bowel Evidence Atlas (Sens/Spec, LR)</a>
+
+                    <h3 class="category-subheader">Videos</h3>
+                    <a href="https://coreultrasound.com/small-bowel-obstruction-2-0-episode-165-ultrasound-podcast-archives/" class="video-link" target="_blank" rel="noopener">SBO 2.0 (Podcast Archive)</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="nerve blocks regional anesthesia analgesia" id="cat-nerve-blocks">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Nerve Blocks / Regional Anesthesia</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Overview</h3>
+                    <a href="https://www.nysora.com/pain-management/ultrasound-guided-upper-extremity-blocks/" class="video-link" target="_blank" rel="noopener">Upper Extremity Blocks Overview</a>
+                    <a href="https://www.nysora.com/pain-management/ultrasound-guided-nerve-blocks-of-the-lower-limb/" class="video-link" target="_blank" rel="noopener">Lower Extremity Blocks Overview</a>
+
+                    <h3 class="category-subheader">Upper Extremity</h3>
+                    <a href="https://www.nysora.com/techniques/upper-extremity/intescalene/ultrasound-guided-interscalene-brachial-plexus-block/" class="video-link" target="_blank" rel="noopener">Interscalene Brachial Plexus</a>
+                    <a href="https://www.nysora.com/topics/regional-anesthesia-for-specific-surgical-procedures/upper-extremity-regional-anesthesia-for-specific-surgical-procedures/anesthesia-and-analgesia-for-elbow-and-forearm-procedures/ultrasound-guided-supraclavicular-brachial-plexus-block/" class="video-link" target="_blank" rel="noopener">Supraclavicular Brachial Plexus</a>
+                    <a href="https://www.nysora.com/topics/regional-anesthesia-for-specific-surgical-procedures/upper-extremity-regional-anesthesia-for-specific-surgical-procedures/anesthesia-and-analgesia-for-elbow-and-forearm-procedures/ultrasound-guided-infraclavicular-brachial-plexus-block/" class="video-link" target="_blank" rel="noopener">Infraclavicular Brachial Plexus</a>
+
+                    <h3 class="category-subheader">Lower Extremity</h3>
+                    <a href="https://www.nysora.com/techniques/lower-extremity/ultrasound-guided-femoral-nerve-block/" class="video-link" target="_blank" rel="noopener">Femoral Nerve Block</a>
+                    <a href="https://www.nysora.com/topics/regional-anesthesia-for-specific-surgical-procedures/lower-extremity-regional-anesthesia-for-specific-surgical-procedures/ultrasound-guided-fascia-iliaca-block/" class="video-link" target="_blank" rel="noopener">Fascia Iliaca Block</a>
+                    <a href="https://www.nysora.com/topics/regional-anesthesia-for-specific-surgical-procedures/lower-extremity-regional-anesthesia-for-specific-surgical-procedures/anesthesia-and-analgesia-for-hip-procedures/ultrasound-guided-lateral-femoral-cutaneous-nerve-block/" class="video-link" target="_blank" rel="noopener">Lateral Femoral Cutaneous Block</a>
+
+                    <h3 class="category-subheader">Thorax / Trunk</h3>
+                    <a href="https://www.nysora.com/topics/regional-anesthesia-for-specific-surgical-procedures/thorax/pectoralis-serratus-plane-blocks/" class="video-link" target="_blank" rel="noopener">Pectoralis & Serratus Plane Blocks</a>
+                </div>
+            </details>
+
+            <details class="category-card" data-category="musculoskeletal msk" id="cat-musculoskeletal">
+                <summary class="category-header">
+                    <div class="category-title">
+                        <span class="title-left"><span class="title-text">Musculoskeletal</span></span>
+                        <span class="collapse-indicator" aria-hidden="true"></span>
+                    </div>
+                </summary>
+                <div class="category-content">
+                    <h3 class="category-subheader">Anatomy</h3>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1615255004791-780UDI7ZJDTFFE5QKAQB/image-asset.gif" class="video-link" target="_blank" rel="noopener">Normal Achilles Tendon</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1728167011736-I4J044VIL8N3Q14V5OK5/image-asset.gif" class="video-link" target="_blank" rel="noopener">Normal Knee (TKA Patient)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1603201414354-M763CKLJBGA2BFY30QZU/image-asset.gif" class="video-link" target="_blank" rel="noopener">Water Bath POCUS</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567932283579-2GZ42FDLVBUG89FN9OBC/patella-tendon.gif" class="video-link" target="_blank" rel="noopener">Patellar Tendon (Colorized)</a>
+                    <a href="https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567932275265-LJOHVVJ6YNUYDBF3AUPG/normal-shoulder.gif" class="video-link" target="_blank" rel="noopener">Shoulder (Colorized)</a>
+
+                    <h3 class="category-subheader">Scanning Protocols</h3>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/shoulder.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Shoulder Protocol</a>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/elbow.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Elbow Protocol</a>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/wrist.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Wrist Protocol</a>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/hip.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Hip Protocol</a>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/knee.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Knee Protocol</a>
+                    <a href="https://essr.org/content-essr/uploads/2016/10/ankle.pdf#page=2.00" class="video-link" target="_blank" rel="noopener">Ankle Protocol</a>
+                </div>
+            </details>
+
+            <div class="no-results hidden" id="noResults">No resources match that search. Try a shorter or different term.</div>
+        </div>
+    </div>
+
+    <button type="button" class="back-to-top" id="backToTop" aria-label="Back to top">▲</button>
+
+    <footer>
+        <p>Powered by Core Ultrasound, NephroPOCUS, MedChiefs, POCUS101, Show Me The POCUS, The POCUS Atlas, ACEP SonoGuide, and NYSORA Resources.</p>
+        <p style="margin-top: 8px; font-size: 11px;">Keyboard: press <strong>/</strong> to search, <strong>Esc</strong> to clear.</p>
+    </footer>
+
+    <script>
+        // ---------- Theme ----------
+        const themeToggle = document.getElementById('themeToggle');
+        const storedTheme = localStorage.getItem('sw-theme');
+        if (storedTheme) document.documentElement.setAttribute('data-theme', storedTheme);
+        function syncThemeLabel() {
+            const current = document.documentElement.getAttribute('data-theme')
+                || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            themeToggle.textContent = current === 'dark' ? 'Light' : 'Dark';
+        }
+        syncThemeLabel();
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme')
+                || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('sw-theme', next);
+            syncThemeLabel();
+        });
+
+        // ---------- Decorate links with type tags + counts ----------
+        function detectType(a) {
+            if (a.dataset.tool) return 'tool';
+            const href = (a.getAttribute('href') || '').toLowerCase();
+            if (/\.pdf(\b|#|\?)/.test(href)) return 'pdf';
+            if (/\.(jpe?g|png|gif|webp|svg)(\b|#|\?)/.test(href)) return 'img';
+            if (href.includes('coreultrasound.com') || href.includes('showmethepocus.com')) return 'video';
+            if (href.includes('onlinelibrary.wiley.com') || href.includes('doi.org') || href.includes('medchiefs')) return 'article';
+            if (href.includes('nephropocus.com') || href.includes('pocus101.com') || href.includes('nysora.com') || href.includes('famus.org.uk') || href.includes('totalem.org') || href.includes('essr.org') || href.includes('thepocusatlas.com') || href.includes('acep.org')) return 'article';
+            return 'link';
+        }
+
+        const TAG_LABEL = { pdf: 'PDF', img: 'IMG', video: 'VIDEO', article: 'ARTICLE', tool: 'TOOL', link: 'LINK' };
+
+        document.querySelectorAll('.video-link').forEach(a => {
+            const type = detectType(a);
+            a.dataset.type = type;
+            const text = a.textContent;
+            a.textContent = '';
+            const tag = document.createElement('span');
+            tag.className = 'link-tag';
+            tag.textContent = TAG_LABEL[type];
+            const label = document.createElement('span');
+            label.className = 'link-text';
+            label.textContent = text;
+            a.append(tag, label);
+            if (a.target === '_blank') {
+                const ext = document.createElement('span');
+                ext.className = 'external-glyph';
+                ext.setAttribute('aria-hidden', 'true');
+                ext.textContent = '↗';
+                a.append(ext);
+            }
+        });
+
+        // Add count badge per category
+        document.querySelectorAll('.category-card').forEach(card => {
+            const count = card.querySelectorAll('.video-link').length;
+            const titleLeft = card.querySelector('.title-left');
+            const badge = document.createElement('span');
+            badge.className = 'video-count';
+            badge.textContent = count;
+            titleLeft.appendChild(badge);
+        });
+
+        // ---------- Collapse / expand-all state (persisted) ----------
+        const STORAGE_OPEN = 'sw-open';
+        const openSet = new Set(JSON.parse(localStorage.getItem(STORAGE_OPEN) || '[]'));
+        document.querySelectorAll('.category-card').forEach(card => {
+            if (openSet.has(card.id)) card.open = true;
+            card.addEventListener('toggle', () => {
+                if (card.open) openSet.add(card.id); else openSet.delete(card.id);
+                localStorage.setItem(STORAGE_OPEN, JSON.stringify([...openSet]));
+                updateToggleAllBtn();
+            });
+        });
+
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        function allOpen() {
+            return [...document.querySelectorAll('.category-card')].every(c => c.open);
+        }
+        function updateToggleAllBtn() {
+            const open = allOpen();
+            toggleAllBtn.textContent = open ? 'Collapse All' : 'Expand All';
+            toggleAllBtn.setAttribute('aria-pressed', open ? 'true' : 'false');
+        }
+        toggleAllBtn.addEventListener('click', () => {
+            const shouldOpen = !allOpen();
+            document.querySelectorAll('.category-card').forEach(c => { c.open = shouldOpen; });
+            updateToggleAllBtn();
+        });
+        updateToggleAllBtn();
+
+        // ---------- Hash deep-linking ----------
+        function openFromHash() {
+            const id = decodeURIComponent(location.hash.replace('#', ''));
+            if (!id) return;
+            const target = document.getElementById(id);
+            if (target && target.classList.contains('category-card')) {
+                target.open = true;
+                target.querySelector('.category-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        window.addEventListener('hashchange', openFromHash);
+        openFromHash();
+
+        // Update hash when a category opens by click (non-destructive)
+        document.querySelectorAll('.category-header').forEach(h => {
+            h.addEventListener('click', () => {
+                const card = h.parentElement;
+                if (!card.open) {
+                    history.replaceState(null, '', '#' + card.id);
+                }
+            });
+        });
+
+        // ---------- Search ----------
+        const searchBox = document.getElementById('searchBox');
+        const searchClear = document.getElementById('searchClear');
+        const searchStatus = document.getElementById('searchStatus');
+        const noResults = document.getElementById('noResults');
+
+        // restore last query
+        const lastQuery = sessionStorage.getItem('sw-q') || '';
+        if (lastQuery) searchBox.value = lastQuery;
+
+        function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        function highlight(el, terms) {
+            const label = el.querySelector('.link-text');
+            if (!label) return;
+            const raw = label.dataset.raw || label.textContent;
+            label.dataset.raw = raw;
+            if (!terms.length) { label.textContent = raw; return; }
+            const pattern = new RegExp('(' + terms.map(escapeRegex).join('|') + ')', 'ig');
+            label.innerHTML = raw.replace(pattern, '<mark>$1</mark>');
+        }
+
+        function performSearch() {
+            const q = searchBox.value.trim().toLowerCase();
+            sessionStorage.setItem('sw-q', q);
+            const terms = q.split(/\s+/).filter(Boolean);
+            const cards = document.querySelectorAll('.category-card');
+            let matchCount = 0;
+            let visibleCats = 0;
+
+            cards.forEach(card => {
+                const catText = (card.dataset.category + ' ' + card.querySelector('.title-text').textContent).toLowerCase();
+                const links = card.querySelectorAll('.video-link');
+                const catMatches = terms.every(t => catText.includes(t));
+                let anyVisible = false;
+
+                links.forEach(link => {
+                    const raw = (link.querySelector('.link-text').dataset.raw || link.querySelector('.link-text').textContent).toLowerCase();
+                    const linkMatches = terms.length === 0 || terms.every(t => raw.includes(t)) || catMatches;
+                    if (linkMatches) {
+                        link.classList.remove('hidden');
+                        anyVisible = true;
+                        matchCount++;
+                    } else {
+                        link.classList.add('hidden');
+                    }
+                    highlight(link, terms);
+                });
+
+                if (!terms.length) {
+                    card.classList.remove('hidden');
+                } else if (anyVisible) {
+                    card.classList.remove('hidden');
+                    card.open = true;
+                    visibleCats++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (terms.length && matchCount === 0) {
+                noResults.classList.remove('hidden');
+                searchStatus.textContent = 'No matches';
+            } else if (terms.length) {
+                noResults.classList.add('hidden');
+                searchStatus.textContent = matchCount + ' match' + (matchCount === 1 ? '' : 'es') + ' in ' + visibleCats + ' categor' + (visibleCats === 1 ? 'y' : 'ies');
+            } else {
+                noResults.classList.add('hidden');
+                searchStatus.textContent = '';
+            }
+        }
+
+        searchBox.addEventListener('input', performSearch);
+        searchClear.addEventListener('click', () => {
+            searchBox.value = '';
+            searchBox.focus();
+            performSearch();
+        });
+
+        // keyboard: "/" focuses search; Esc clears
+        document.addEventListener('keydown', e => {
+            if (e.key === '/' && document.activeElement !== searchBox) {
+                e.preventDefault();
+                searchBox.focus();
+                searchBox.select();
+            } else if (e.key === 'Escape' && document.activeElement === searchBox && searchBox.value) {
+                searchBox.value = '';
+                performSearch();
+            }
+        });
+
+        if (lastQuery) performSearch();
+
+        // ---------- Back-to-top ----------
+        const backBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backBtn.classList.toggle('visible', window.scrollY > 400);
+        }, { passive: true });
+        backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // ---------- Inline "tool" tables (RUSH, 5Es) ----------
+        const TOOL_HTML = {
+            rush: buildToolHTML('RUSH Protocol Table', 'Table 2: Using the RUSH protocol to diagnose the type of shock', [
+                {
+                    title: 'Step 1: Pump', html: `
+                        <div class="section"><strong>Pericardial effusion:</strong><br>• Effusion present?<br>• Signs of tamponade?<br>• Diastolic collapse of R Vent +/− R Atrium?</div>
+                        <div class="section"><strong>Left ventricular contractility:</strong><br>• Hyperdynamic?<br>• Normal?<br>• Decreased?</div>
+                        <div class="section"><strong>Right ventricular strain:</strong><br>• Increased size of RV?<br>• Septal displacement from right to left?</div>`
+                },
+                {
+                    title: 'Step 2: Tank', html: `
+                        <div class="section"><strong>Tank volume:</strong><br><u>Inferior vena cava:</u><br>• Large size/small Insp collapse? —CVP high—<br>• Small size/large Insp collapse? —CVP Low—<br><u>Internal jugular veins:</u><br>• Small or large?</div>
+                        <div class="section"><strong>Tank leakiness:</strong><br><u>E-FAST exam:</u><br>• Free fluid Abd/Pelvis?<br>• Free fluid thoracic cavity?<br><u>Pulm edema:</u><br>• Lung rockets?</div>
+                        <div class="section"><strong>Tank compromise:</strong><br><u>Tension pneumothorax:</u><br>• Absent lung sliding?<br>• Absent comet tails?</div>`
+                },
+                {
+                    title: 'Step 3: Pipes', html: `
+                        <div class="section"><strong>Abdominal aorta aneurysm:</strong><br>• Abd aorta &gt; 3 cm?</div>
+                        <div class="section"><strong>Thoracic aorta aneurysm/dissection:</strong><br>• Aortic root &gt; 3.8 cm?<br>• Intimal flap?<br>• Thor aorta &gt; 5 cm?</div>
+                        <div class="section"><strong>Femoral vein DVT:</strong><br>• Noncompressible vessel?</div>
+                        <div class="section"><strong>Popliteal vein DVT:</strong><br>• Noncompressible vessel?</div>`
+                }
+            ]),
+            fiveEs: buildToolHTML("5 E's Cardiac Ultrasound Protocol", "Table 1: Explanation of the 5Es", [
+                { title: '1. Effusion', html: `
+                    <div class="section"><div class="category">Categorization of Findings</div>• None (trace)<br>• Small (&lt;1 cm)<br>• Moderate (1-2 cm)<br>• Large (&gt;2 cm)</div>
+                    <div class="section"><div class="category">Additional Findings</div><div class="additional">• Tamponade physiology<br>• RV free wall collapse in diastole (may use M-mode)<br>• RA collapse in ventricular systole<br>• 25% respirophasic variation in peak velocity using spectral Doppler<br>• Plethoric IVC</div></div>` },
+                { title: '2. Ejection', html: `
+                    <div class="section"><div class="category">Categorization of Findings</div>• Hyperdynamic (EF &gt; 65%)<br>• Normal (EF 50%-65%)<br>• Moderately depressed (EF 30%-50%)<br>• Severely depressed (EF &lt; 30%)<br>• No significant myocardial activity</div>
+                    <div class="section"><div class="category">Additional Findings</div><div class="additional">• E-point septal separation &lt; 7 mm is normal<br>• LV diameter &gt; 6 cm in diastole is abnormal<br>• Wall motion abnormalities using "SALPI" mnemonic (septal, anterior, lateral, posterior, inferior) on short-axis view</div></div>` },
+                { title: '3. Equality', html: `
+                    <div class="section"><div class="category">Categorization of Findings</div>• Normal (RV:LV &lt; 1)<br>• Enlarged (RV:LV ≥ 1)</div>
+                    <div class="section"><div class="category">Additional Findings</div><div class="additional">• Other signs of RV strain:<br>&nbsp;&nbsp;○ Septal bowing (D-shaped septum)<br>&nbsp;&nbsp;○ McConnell's sign<br>&nbsp;&nbsp;○ Elevated RV pressure estimated using continuous wave Doppler with peak TR<br>&nbsp;&nbsp;○ TAPSE &lt; 16 mm<br>• Beware chronic RV strain (COPD, pulmonary hypertension)<br>&nbsp;&nbsp;○ RV free wall thickness &gt; 5 mm<br>&nbsp;&nbsp;○ TR jet very elevated (&gt;4 m/sec)<br>&nbsp;&nbsp;○ Absent McConnell's sign</div></div>` },
+                { title: '4. Exit', html: `
+                    <div class="section"><div class="category">Categorization of Findings</div>• Normal root (&lt;4 cm)<br>• Borderline root (4-4.5 cm)<br>• TAA (&gt;4.5 cm)</div>
+                    <div class="section"><div class="category">Additional Findings</div><div class="additional">• Dissection flap<br>• Aortic regurgitation using color Doppler<br>• Pericardial effusion</div></div>` },
+                { title: '5. Entrance', html: `
+                    <div class="section"><div class="category">Categorization of Findings</div>• Flat IVC (&lt;1 cm, &gt; 75% collapse)<br>• Normal collapse<br>• Full IVC (&gt;2 cm, &lt; 25% collapse)</div>
+                    <div class="section"><div class="category">Additional Findings</div><div class="additional">• Can use M-mode to calculate caval index:<br>&nbsp;&nbsp;max IVC diameter - min IVC diameter<br>&nbsp;&nbsp;÷ max IVC diameter<br>• Measurements within 1-2 cm of hepatic vein</div></div>` }
+            ], '<p style="margin-top:20px;font-size:10px;color:#666;"><strong>Abbreviations:</strong> COPD = chronic obstructive pulmonary disease; EF = ejection fraction; IVC = inferior vena cava; LA = left atrium; LV = left ventricle; RA = right atrium; RV = right ventricle; TAA = thoracic aortic aneurysm; TR = tricuspid regurgitation.</p>')
+        };
+
+        function buildToolHTML(title, subtitle, steps, extra = '') {
+            const cols = steps.length;
+            const stepHTML = steps.map(s => `<div class="step"><h4>${s.title}</h4>${s.html}</div>`).join('');
+            return `<!DOCTYPE html><html><head><title>${title}</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body { font-family:'Courier New',monospace; background:#BEBEBE; margin:20px; color:#000; }
+                    .container { background:#BEBEBE; border:4px solid #000; border-style:outset; padding:20px; max-width:1200px; margin:0 auto; }
+                    h2 { color:#990000; text-align:center; margin-bottom:10px; text-transform:uppercase; }
+                    h3 { color:#990000; margin-bottom:15px; text-align:center; }
+                    .grid { display:grid; grid-template-columns:repeat(${cols},1fr); gap:15px; font-size:12px; }
+                    .step { background:#828282; border:2px solid #000; border-style:inset; padding:15px; }
+                    h4 { color:#990000; text-transform:uppercase; margin-bottom:10px; }
+                    .section { margin-bottom:12px; }
+                    .category { color:#990000; font-weight:bold; margin-bottom:5px; }
+                    .additional { color:#000080; font-size:10px; }
+                    @media (max-width:1024px) { .grid { grid-template-columns:1fr 1fr; } }
+                    @media (max-width:768px) { .grid { grid-template-columns:1fr; } }
+                    @media (prefers-color-scheme: dark) {
+                        body { background:#1a1a1a; color:#e8e8e8; }
+                        .container { background:#2e2e2e; }
+                        .step { background:#1a1a1a; }
+                        h2,h3,h4,.category { color:#ff6b6b; }
+                        .additional { color:#8bb4ff; }
+                    }
+                </style></head><body><div class="container"><h2>${title}</h2><h3>${subtitle}</h3><div class="grid">${stepHTML}</div>${extra}</div></body></html>`;
+        }
+
+        document.querySelectorAll('.video-link[data-tool]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const key = a.dataset.tool;
+                const html = TOOL_HTML[key];
+                if (!html) return;
+                const w = window.open('', '_blank');
+                if (!w) return;
+                w.document.write(html);
+                w.document.close();
+            });
+        });
+    </script>
+</body>
+</html>

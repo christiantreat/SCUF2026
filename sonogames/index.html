@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stony Brook Sonogames 2026 Qualifying Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        .quiz-wrapper {
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        #quiz {
+            width: 100%;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        /* Header: nav + info in one bar */
+        .question-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid #333;
+            background-color: #0a0a0a;
+            flex-shrink: 0;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .question-counter {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .progress {
+            color: #888;
+        }
+
+        .save-status {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .save-status.saved {
+            color: #4a4;
+        }
+
+        .nav-btn {
+            background-color: #1a1a1a;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 7px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .nav-btn:hover {
+            background-color: #2a2a2a;
+            border-color: #555;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.25;
+            cursor: default;
+        }
+
+        .nav-btn:disabled:hover {
+            background-color: #1a1a1a;
+            border-color: #444;
+        }
+
+        /* Stem */
+        .question-stem {
+            padding: 14px 20px;
+            font-size: 18px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #222;
+        }
+
+        /* Content: image + answers side by side */
+        .question-content {
+            display: flex;
+            gap: 16px;
+            padding: 12px 20px;
+            overflow: auto;
+        }
+
+        .image-column {
+            flex: 1.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .image-column img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border: 1px solid #333;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Image lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox-overlay.show {
+            display: flex;
+        }
+
+        .lightbox-overlay img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            color: #fff;
+            font-size: 32px;
+            cursor: pointer;
+            z-index: 9999;
+            background: none;
+            border: none;
+            line-height: 1;
+            padding: 4px 10px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .answers-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        /* No-image: answers centered full-width */
+        .question-content.no-image {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-content.no-image .answers-column {
+            max-width: 750px;
+            width: 100%;
+        }
+
+        .answers {
+            margin: 0;
+        }
+
+        .answer-option {
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .answer-option:hover {
+            background-color: #1a1a1a;
+            border-color: #444;
+        }
+
+        .answer-option label {
+            cursor: pointer;
+            display: block;
+            padding: 10px 14px;
+            font-size: 16px;
+        }
+
+        .answer-option input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+            transform: scale(1.15);
+        }
+
+        .note {
+            margin: 8px 0 0;
+            padding: 8px 10px;
+            background-color: #1a1a1a;
+            border-left: 3px solid #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Cheat-proof modal */
+        .cheat-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cheat-overlay.show {
+            display: flex;
+        }
+
+        .cheat-modal {
+            background: #111;
+            border: 2px solid #444;
+            border-radius: 12px;
+            padding: 40px 50px;
+            max-width: 550px;
+            text-align: center;
+            animation: cheatPop 0.3s ease-out;
+        }
+
+        @keyframes cheatPop {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .cheat-modal .quote {
+            font-size: 20px;
+            font-style: italic;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .cheat-modal button {
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .cheat-modal button:hover {
+            background-color: #333;
+            border-color: #777;
+        }
+
+        /* Submit page */
+        .submit-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+
+        .submit-content label {
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .submit-content input[type="text"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #1a1a1a;
+            color: #fff;
+            outline: none;
+        }
+
+        .submit-content input[type="text"]:focus {
+            border-color: #666;
+        }
+
+        .submit-btn {
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: 500;
+            background-color: #1a6b35;
+            color: #fff;
+            border: 1px solid #2a8a4a;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #228b44;
+            border-color: #3a9a5a;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .submit-warning {
+            color: #888;
+            font-size: 13px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        /* Welcome page */
+        .welcome-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 30px;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #aaa;
+            max-width: 420px;
+            line-height: 1.6;
+        }
+
+        .welcome-highlight {
+            font-size: 17px;
+            color: #e8c547;
+            font-weight: 600;
+        }
+
+        .welcome-luck {
+            font-size: 18px;
+            color: #ccc;
+            font-style: italic;
+            margin-top: 4px;
+        }
+
+        .welcome-btn {
+            margin-top: 12px;
+            padding: 14px 48px;
+            font-size: 17px;
+            font-weight: 600;
+            background-color: #1a6b35;
+            color: #fff;
+            border: 1px solid #2a8a4a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .welcome-btn:hover {
+            background-color: #228b44;
+            border-color: #3a9a5a;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .quiz-wrapper {
+                padding: 4px 6px;
+            }
+
+            .question-header {
+                padding: 8px 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .header-center {
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .progress, .save-status {
+                display: none;
+            }
+
+            .question-stem {
+                padding: 10px 14px;
+                font-size: 15px;
+            }
+
+            /* Stack image above answers */
+            .question-content {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 14px;
+            }
+
+            .image-column {
+                flex: none;
+                max-height: 35vh;
+            }
+
+            .image-column img {
+                max-height: 35vh;
+            }
+
+            .answers-column {
+                flex: none;
+            }
+
+            .answer-option label {
+                padding: 11px 12px;
+                font-size: 15px;
+                line-height: 1.4;
+            }
+
+            .answer-option input[type="radio"] {
+                transform: scale(1.3);
+                margin-right: 12px;
+            }
+
+            .note {
+                font-size: 12px;
+            }
+
+            .cheat-modal {
+                padding: 28px 24px;
+                margin: 0 16px;
+            }
+
+            .cheat-modal .quote {
+                font-size: 17px;
+            }
+
+            .welcome-content {
+                padding: 30px 20px;
+            }
+
+            .welcome-title {
+                font-size: 22px;
+            }
+
+            .welcome-subtitle {
+                font-size: 14px;
+            }
+
+            .welcome-highlight {
+                font-size: 15px;
+            }
+
+            .welcome-btn {
+                padding: 12px 36px;
+                font-size: 16px;
+            }
+
+            .submit-content {
+                padding: 24px 16px;
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 400px) {
+            .question-stem {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+
+            .answer-option label {
+                font-size: 14px;
+                padding: 10px 10px;
+            }
+
+            .question-content {
+                padding: 8px 10px;
+            }
+
+            .image-column, .image-column img {
+                max-height: 30vh;
+            }
+
+            .nav-btn {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+        }
+
+        @media print {
+            body { background-color: #fff; color: #000; }
+            .question-header { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-wrapper">
+        <div id="quiz"></div>
+    </div>
+
+    <!-- Cheat-proof popup -->
+    <div class="cheat-overlay" id="cheatOverlay">
+        <div class="cheat-modal">
+            <div class="quote" id="cheatQuote"></div>
+            <button onclick="closeCheatModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- Image lightbox -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightboxImg" src="" alt="Enlarged image">
+    </div>
+
+    <script>
+        const questions = [
+            {
+                number: 1,
+                stem: "A 4-year-old hemodynamically stable male presents with cough, fevers, and congestion for 2 days. You perform the lung ultrasound below. What is the next best step in management?",
+                answers: [
+                    "A. Antibiotics",
+                    "B. Chest X-ray",
+                    "C. Transfer to children\u2019s hospital",
+                    "D. Antipyretics and discharge"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1660318530325-P9UBT29O9YR3PBCRGYBJ/image-asset.gif?format=300w"
+            },
+            {
+                number: 2,
+                stem: "At what gestational age can you reliably visualize a fetal pole with cardiac activity on transvaginal ultrasound? (Assume a normal viable intrauterine pregnancy.)",
+                answers: [
+                    "A. 4\u20135 weeks",
+                    "B. 5\u20136 weeks",
+                    "C. 7\u20138 weeks",
+                    "D. 9\u201310 weeks"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1720554061163-UTEU446DV5FSBC5Z61LQ/image-asset.gif?format=300w"
+            },
+            {
+                number: 3,
+                stem: "What is the most likely complaint of the following patient?",
+                answers: [
+                    "A. Painful arm rotation",
+                    "B. Headache",
+                    "C. Back pain",
+                    "D. Fracture"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/5bc94f5b9b7d1515843688af/1616937880006-PGQRLVROBBY2CVU3A8Y7/n.png?format=2500w"
+            },
+            {
+                number: 4,
+                stem: "A 28-year-old presents with lower abdominal pain. You perform the following ultrasound. What is the most likely diagnosis, and which additional ultrasound finding would make you most concerned?",
+                answers: [
+                    "A. Appendicitis; free fluid in the RLQ with loss of the appendiceal wall integrity",
+                    "B. Bladder mass; hydronephrosis with ureteral dilation",
+                    "C. Ectopic pregnancy; free fluid in Morrison's pouch",
+                    "D. Corpus luteum cyst; enlarged ovary with absent Doppler flow suggesting torsion"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1706570866137-EE4Q4LKJK92SV4GY7C0B/image-asset.gif?format=750w"
+            },
+            {
+                number: 5,
+                stem: "A 78-year-old female on clopidogrel presents with one hour of vision changes. You perform the following ocular ultrasound. What is your next step in management?",
+                answers: [
+                    "A. Lateral canthotomy",
+                    "B. Discontinue clopidogrel and discuss with ophthalmology",
+                    "C. Neurology consult",
+                    "D. Possible thrombolytic therapy and ophthalmology consult"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1514856196906-FUG64OLXYMGE9IMGE8NE/Central+Retinal+Artery+Occlusion+venous+flow+-+Schechter.gif?format=2500w"
+            },
+            {
+                number: 6,
+                stem: "A patient presents with acute visual changes in the left eye. You perform an ocular ultrasound (probe marker screen left, towards nose). Based on this finding, what is the most appropriate ophthalmology referral timeframe?",
+                answers: [
+                    "A. Emergent \u2014 same day (within 6 hours)",
+                    "B. Urgent \u2014 within 24 hours",
+                    "C. Routine \u2014 within 2\u20134 weeks"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1627503443638-0PAZQ25A5CLFARM2BVMZ/image-asset.gif?format=500w"
+            },
+            {
+                number: 7,
+                stem: "A 70-year-old male presents with mild abdominal pain and stable vital signs. What is the most likely cause of the findings seen?",
+                answers: [
+                    "A. Perforated viscus",
+                    "B. Prior surgical procedure",
+                    "C. Acute cholecystitis",
+                    "D. Mesenteric ischemia"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567013645799-IIBASIEONI3N68X3IYZC/pneumobilia.gif?format=2500w"
+            },
+            {
+                number: 8,
+                stem: "The region where the ultrasound beam converges before diverging is called the _____ and its length is determined by _____.",
+                answers: [
+                    "A. Fresnel zone; transducer frequency and element diameter",
+                    "B. Fraunhofer zone; pulse repetition frequency",
+                    "C. Focal zone; gain settings",
+                    "D. Convergence zone; time-gain compensation"
+                ]
+            },
+            {
+                number: 9,
+                stem: "All of the following are ultrasonographic signs of abdominal aortic aneurysm rupture EXCEPT:",
+                answers: [
+                    "A. Turbulent flow within the aneurysm lumen",
+                    "B. Disruption of calcifications in the aortic wall",
+                    "C. Flattening or displacement of the psoas muscle",
+                    "D. Surrounding retroperitoneal free fluid",
+                    "E. Intramural thrombus within the aneurysm"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1617893937647-54ZZ3JZ55YZ2S4D0DXHA/image-asset.gif?format=500w"
+            },
+            {
+                number: 10,
+                stem: "The artifact seen in this clip is called ______ and is due to ______ of sound waves.",
+                answers: [
+                    "A. Posterior acoustic enhancement; low attenuation",
+                    "B. Side lobe artifact; low attenuation",
+                    "C. Posterior acoustic enhancement; high attenuation",
+                    "D. Side lobe artifact; high attenuation"
+                ],
+                image: "https://www.pocus.org/wp-content/uploads/2023/07/Screenshot-2023-07-23-144616.png"
+            },
+            {
+                number: 11,
+                stem: "A 32-year-old female presents with severe lower abdominal pain. What is the most sensitive finding for the pathology seen on this clip?",
+                answers: [
+                    "A. Peripheralization of the follicles",
+                    "B. Lack of blood flow to the ovary",
+                    "C. Enlarged ovary",
+                    "D. Free fluid"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1609959738037-49YAZDNSYA07CI8PAFG8/image-asset.gif?format=500w"
+            },
+            {
+                number: 12,
+                stem: "A patient presents in cardiac arrest with active compressions. You obtain the following subxiphoid view during a pulse check. What is the next best step in management?",
+                answers: [
+                    "A. Empiric tissue plasminogen activator (tPA) for massive pulmonary embolism",
+                    "B. Immediate pericardiocentesis for cardiac tamponade",
+                    "C. Reposition compressions higher on the sternum",
+                    "D. Terminate resuscitation due to poor prognosis",
+                    "E. Continue current management and search for other reversible causes"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1616443665596-8SM6QHLY76QAGMUBV34Y/image-asset.gif?format=500w"
+            },
+            {
+                number: 13,
+                stem: "A patient presents with pain to his hand. You perform the following ultrasound. What is the next step in management?",
+                answers: [
+                    "A. Start antibiotics",
+                    "B. Emergent surgery",
+                    "C. Splint",
+                    "D. Foreign body removal"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1554692613487-GL7ES4Y1OBRHFT0YO3BV/necrotizing+fasciitis+.gif?format=500w"
+            },
+            {
+                number: 14,
+                stem: "Approximately how many standard single-use ultrasound gel packets could fit inside one of our trauma resuscitation rooms (floor to ceiling, wall to wall) if perfectly packed?",
+                answers: [
+                    "A. 10,000 packets",
+                    "B. 100,000 packets",
+                    "C. 1,000,000 packets",
+                    "D. 10,000,000 packets"
+                ]
+            },
+            {
+                number: 15,
+                stem: "Which of the following is most accurate regarding tricuspid annular plane systolic excursion (TAPSE)?",
+                answers: [
+                    "A. Less reliable in a patient with a prior inferior myocardial infarction",
+                    "B. May be measured using the subxiphoid or apical four-chamber view",
+                    "C. Measures circumferential right ventricular systolic function",
+                    "D. Should not be measured in a patient with an irregular heartbeat"
+                ]
+            },
+            {
+                number: 16,
+                stem: "A patient on anticoagulation presents with blurry vision. Based on the following ocular ultrasound, what is your next step in management?",
+                answers: [
+                    "A. Supportive care",
+                    "B. Lateral canthotomy",
+                    "C. CT scan of the orbits",
+                    "D. Eye shield"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1616116010452-4OI6MM2EOTIOIIPZ5EC1/image-asset.gif?format=500w"
+            },
+            {
+                number: 17,
+                stem: "Based on the ultrasound anatomy shown below, what nerve block is being performed?",
+                answers: [
+                    "A. Serratus anterior plane block",
+                    "B. Interscalene block",
+                    "C. Erector spinae plane block",
+                    "D. Pericapsular nerve group (PENG) block"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1605815952957-DFQAOMVN5P97IFHIP7SM/image-asset.gif?format=750w"
+            },
+            {
+                number: 18,
+                stem: "Based on the ultrasound anatomy shown, what procedure is being performed and what pain will it relieve?",
+                answers: [
+                    "A. Femoral nerve block \u2014 anterior thigh pain",
+                    "B. Fascia iliaca block \u2014 hip and proximal femur pain",
+                    "C. Obturator nerve block \u2014 medial thigh pain",
+                    "D. Sciatic nerve block \u2014 posterior leg pain"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1605665047706-0GS9Z718BYIBOQ90G5KV/image-asset.gif?format=500w"
+            },
+            {
+                number: 19,
+                stem: "What is Dan Singer\u2019s band\u2019s name?",
+                answers: [
+                    "A. Cool Dude Groovin",
+                    "B. The Ultra Gellies",
+                    "C. Dude, Where\u2019s My Probe?",
+                    "D. The Artifacts",
+                    "E. Wait, he is in a band?"
+                ]
+            },
+            {
+                number: 20,
+                stem: "You perform the following lung ultrasound. What is true regarding the ultrasound beam as it travels from soft tissue to air?",
+                answers: [
+                    "A. The velocity increases",
+                    "B. The pulse duration increases",
+                    "C. The wavelength decreases",
+                    "D. The frequency decreases"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1527653744461-9JV9FLATDWL00GOWJIZ3/a+lines+normal.gif?format=500w"
+            },
+            {
+                number: 21,
+                stem: "The structure shown in pink is part of the portal triad. What are the other two structures in this triad?",
+                answers: [
+                    "A. Hepatic artery and portal vein",
+                    "B. Common bile duct and hepatic vein",
+                    "C. Cystic duct and hepatic artery",
+                    "D. Portal vein and common bile duct"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567929662896-OVT3GRVKEE6G5FYO7RDA/gallbladder-and-cbd.gif?format=750w"
+            },
+            {
+                number: 22,
+                stem: "A 65-year-old male presents with dyspnea on exertion. You perform a bedside echocardiogram. You then measure the E-point septal separation (EPSS). What is the most likely EPSS value in this patient?",
+                answers: [
+                    "A. 3 mm",
+                    "B. 7 mm",
+                    "C. 10 mm",
+                    "D. 18 mm"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1680198032131-P2FIQDODZHSKVCF9JZKP/image-asset.gif?format=300w"
+            },
+            {
+                number: 23,
+                stem: "You are performing a carotid Doppler study using a 7.5 MHz linear probe at a 60-degree angle. The speed of sound in tissue is 1,540 m/s. Your imaging depth is 4.2 cm. If the pulse repetition frequency (PRF) is 8,000 Hz and you observe aliasing of blood flow in the internal carotid artery, what is the minimum true peak systolic velocity of blood flow?",
+                answers: [
+                    "A. 0.34 m/s",
+                    "B. 0.68 m/s",
+                    "C. 1.37 m/s",
+                    "D. 2.05 m/s"
+                ]
+            },
+            {
+                number: 24,
+                stem: "The technique shown would be most useful for which clinical scenario?",
+                answers: [
+                    "A. Evaluating for deep vein thrombosis",
+                    "B. Localizing a superficial foreign body",
+                    "C. Assessing for pleural effusion",
+                    "D. Measuring bladder volume"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1603201414354-M763CKLJBGA2BFY30QZU/image-asset.gif?format=750w"
+            },
+            {
+                number: 25,
+                stem: "A trauma patient has the pelvic FAST view shown. Which statement is true regarding this finding?",
+                answers: [
+                    "A. A negative FAST rules out all intra-abdominal injury",
+                    "B. This amount of fluid represents at least 500\u20131000 mL of hemoperitoneum",
+                    "C. Free fluid in the pelvis is the most sensitive FAST view for detecting hemoperitoneum",
+                    "D. CT is required to confirm this finding before surgical intervention"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1507764822945-I5AIOFVSXHQ8P5FW445E/bowra+pos+fast+trans+bladder.gif?format=300w"
+            },
+            {
+                number: 26,
+                stem: "What is the clinical significance of this finding?",
+                answers: [
+                    "A. Requires immediate anticoagulation due to high pulmonary embolism risk",
+                    "B. Superficial thrombophlebitis \u2014 lower risk than deep vein thrombosis",
+                    "C. Requires inferior vena cava filter placement",
+                    "D. No treatment needed \u2014 benign finding"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1626288896671-HXRWMPFW1JKWXILXQX1H/image-asset.gif?format=500w"
+            },
+            {
+                number: 27,
+                stem: "On this transthoracic echocardiography parasternal short-axis view at the aortic valve level, identify the three coronary cusps in clockwise order starting from the 12 o\u2019clock position.",
+                answers: [
+                    "A. Non-coronary cusp (12 o\u2019clock) \u2192 Right coronary cusp (4 o\u2019clock) \u2192 Left coronary cusp (8 o\u2019clock)",
+                    "B. Right coronary cusp (12 o\u2019clock) \u2192 Left coronary cusp (4 o\u2019clock) \u2192 Non-coronary cusp (8 o\u2019clock)",
+                    "C. Left coronary cusp (12 o\u2019clock) \u2192 Non-coronary cusp (4 o\u2019clock) \u2192 Right coronary cusp (8 o\u2019clock)",
+                    "D. Right coronary cusp (12 o\u2019clock) \u2192 Non-coronary cusp (4 o\u2019clock) \u2192 Left coronary cusp (8 o\u2019clock)"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1515545459549-ND42DTE1LFWWBU75CEA9/ezgif.com-optimize+%2820%29.gif?format=750w"
+            },
+            {
+                number: 28,
+                stem: "On this musculoskeletal ultrasound of the shoulder, what acromioclavicular joint separation distance is considered pathologic?",
+                answers: [
+                    "A. Greater than 3 mm",
+                    "B. Greater than 5 mm",
+                    "C. Greater than 7 mm",
+                    "D. Greater than 10 mm"
+                ],
+                image: "https://pocus101.b-cdn.net/wp-content/uploads/2023/03/Superior-shoulder-ultrasound-AC-Joint-Scanning-Through.gif"
+            },
+            {
+                number: 29,
+                stem: "Based on the following abdominal ultrasound findings, which clinical presentation is most likely?",
+                answers: [
+                    "A. 6-week-old with projectile, non-bilious vomiting after feeds and hypochloremic metabolic alkalosis",
+                    "B. 8-month-old with intermittent colicky abdominal pain, currant jelly stools, and a palpable right upper quadrant mass",
+                    "C. 3-day-old neonate with bilious vomiting and a \u201Cdouble bubble\u201D sign on abdominal X-ray",
+                    "D. 2-week-old with bilious vomiting, abdominal distension, and bloody stools"
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1701692940456-I5NH1PSPMSJ5Z9VGR38E/ezgif.com-gif-maker.gif?format=750w"
+            },
+            {
+                number: 30,
+                stem: "Submit Your Quiz",
+                type: "submit"
+            }
+        ];
+
+        // Cheat-proof quotes
+        const cheatQuotes = [
+            "\u201CI find your lack of faith disturbing.\u201D \u2014 Darth Vader",
+            "\u201CYou shall not pass!\u201D \u2014 Gandalf",
+            "\u201CYou have no power here!\u201D \u2014 Th\u00E9oden, LOTR",
+            "\u201CI\u2019m sorry, Dave. I\u2019m afraid I can\u2019t do that.\u201D \u2014 HAL 9000",
+            "\u201CDid you really think it would be that easy?\u201D \u2014 Every villain ever",
+            "\u201CNice try, but you\u2019re gonna have to do better than that.\u201D",
+            "\u201CCurses! Foiled again!\u201D",
+            "\u201CI see through the lies of the Ctrl+C!\u201D",
+            "\u201CYour overconfidence is your weakness.\u201D",
+            "\u201CNot today.\u201D \u2014 Arya Stark",
+            "\u201CI don\u2019t think so, Tim.\u201D \u2014 Home Improvement",
+            "\u201CThat\u2019s a bold strategy, Cotton. Let\u2019s see if it pays off for \u2019em.\u201D \u2014 Dodgeball (spoiler: it won\u2019t)"
+        ];
+
+        let lastPopupTime = 0;
+        let currentQuestionIndex = 0;
+
+        // --- Metadata tracking ---
+        let quizStartTime = null;
+        let questionViewTimes = {};   // { questionNumber: timestamp when first viewed }
+        let questionDurations = {};   // { questionNumber: seconds spent before answering }
+        let questionEnteredAt = null; // timestamp when current question was shown
+        let behaviorLog = [];         // array of { type, timestamp, detail }
+
+        function logBehavior(type, detail) {
+            behaviorLog.push({
+                type: type,
+                time: new Date().toLocaleTimeString(),
+                detail: detail || ''
+            });
+        }
+
+        function showCheatPopup() {
+            const now = Date.now();
+            if (now - lastPopupTime < 1500) return;
+            lastPopupTime = now;
+            logBehavior('copy_attempt', 'Q' + (currentQuestionIndex + 1));
+            const quote = cheatQuotes[Math.floor(Math.random() * cheatQuotes.length)];
+            document.getElementById('cheatQuote').textContent = quote;
+            document.getElementById('cheatOverlay').classList.add('show');
+        }
+
+        function closeCheatModal() {
+            document.getElementById('cheatOverlay').classList.remove('show');
+        }
+
+        // --- Image lightbox ---
+        function openLightbox(src) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.add('show');
+        }
+
+        function closeLightbox(e) {
+            if (e && e.target && e.target.id === 'lightboxImg') return;
+            document.getElementById('lightbox').classList.remove('show');
+        }
+
+        // --- Tab switch / focus tracking ---
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && quizStartTime) {
+                logBehavior('tab_hidden', 'Q' + (currentQuestionIndex + 1));
+            }
+        });
+        window.addEventListener('blur', function() {
+            if (quizStartTime) {
+                logBehavior('window_blur', 'Q' + (currentQuestionIndex + 1));
+            }
+        });
+
+        // --- Cheat-proofing ---
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A')) {
+                e.preventDefault();
+                showCheatPopup();
+            }
+            if (e.key === 'Escape') { closeLightbox(e); closeCheatModal(); }
+            if (e.key === 'ArrowRight') nextQuestion();
+            if (e.key === 'ArrowLeft') prevQuestion();
+        });
+
+        // --- Render a single question into the quiz container ---
+        function showQuestion(index) {
+            // Record time spent on previous question before navigating away
+            if (questionEnteredAt && currentQuestionIndex >= 0) {
+                var prevQ = questions[currentQuestionIndex];
+                if (prevQ && prevQ.type !== 'submit') {
+                    var elapsed = Math.round((Date.now() - questionEnteredAt) / 1000);
+                    questionDurations[prevQ.number] = (questionDurations[prevQ.number] || 0) + elapsed;
+                }
+            }
+
+            currentQuestionIndex = index;
+            const container = document.getElementById('quiz');
+
+            // Welcome page
+            if (index === -1) {
+                questionEnteredAt = null;
+                container.innerHTML =
+                    '<div class="welcome-content">' +
+                        '<div class="welcome-title">Welcome to<br>Stony Brook Sonogames 2026<br>Qualifying Quiz</div>' +
+                        '<div class="welcome-subtitle">Your answers save automatically as you go.<br>You can close and come back anytime.</div>' +
+                        '<div class="welcome-highlight">Winners get a trip to ATL 2026!</div>' +
+                        '<div class="welcome-luck">Good luck!</div>' +
+                        '<button class="welcome-btn" onclick="startQuiz()">Begin Quiz</button>' +
+                    '</div>';
+                return;
+            }
+
+            const q = questions[index];
+
+            // Track when each question is first viewed
+            if (q.type !== 'submit' && !questionViewTimes[q.number]) {
+                questionViewTimes[q.number] = new Date().toLocaleTimeString();
+            }
+            questionEnteredAt = Date.now();
+            const savedData = loadData();
+
+            const prevDisabled = '';
+            const nextDisabled = index === questions.length - 1 ? 'disabled' : '';
+
+            // Submit page
+            if (q.type === 'submit') {
+                const savedName = localStorage.getItem('qbankQuizName') || '';
+                container.innerHTML =
+                    '<div class="question-header">' +
+                        '<button class="nav-btn" onclick="prevQuestion()" ' + prevDisabled + '>&#8592; Prev</button>' +
+                        '<div class="header-center">' +
+                            '<span class="question-counter">Submit</span>' +
+                            '<span class="progress" id="progress"></span>' +
+                            '<span class="save-status" id="saveStatus"></span>' +
+                        '</div>' +
+                        '<button class="nav-btn" disabled>Next &#8594;</button>' +
+                    '</div>' +
+                    '<div class="question-stem">' + q.stem + '</div>' +
+                    '<div class="submit-content">' +
+                        '<label for="playerName">Enter your name</label>' +
+                        '<input type="text" id="playerName" placeholder="First and Last Name" value="' + savedName.replace(/"/g, '&quot;') + '">' +
+                        '<button class="submit-btn" id="submitBtn" onclick="submitQuiz()">Submit</button>' +
+                        '<p class="submit-warning" id="submitMsg"></p>' +
+                    '</div>';
+                updateProgress();
+                var nameInput = document.getElementById('playerName');
+                if (nameInput) {
+                    nameInput.addEventListener('input', function() {
+                        localStorage.setItem('qbankQuizName', nameInput.value);
+                    });
+                }
+                return;
+            }
+
+            let answersHtml = '';
+            q.answers.forEach((answer, i) => {
+                const id = 'q' + q.number + '_a' + i;
+                const checked = savedData[q.number]?.selected === i ? 'checked' : '';
+                answersHtml += '<div class="answer-option"><label for="' + id + '">' +
+                    '<input type="radio" name="q' + q.number + '" id="' + id + '" value="' + i + '" ' + checked + ' onchange="handleAnswer()">' +
+                    answer + '</label></div>';
+            });
+
+            let contentHtml;
+            if (q.image) {
+                contentHtml = '<div class="question-content">' +
+                    '<div class="image-column"><img src="' + q.image + '" alt="Question ' + q.number + ' image" draggable="false" onclick="openLightbox(this.src)"></div>' +
+                    '<div class="answers-column"><div class="answers">' + answersHtml + '</div>' +
+                    (q.note ? '<div class="note">Note: ' + q.note + '</div>' : '') +
+                    '</div></div>';
+            } else {
+                contentHtml = '<div class="question-content no-image">' +
+                    '<div class="answers-column"><div class="answers">' + answersHtml + '</div>' +
+                    (q.note ? '<div class="note">Note: ' + q.note + '</div>' : '') +
+                    '</div></div>';
+            }
+
+            container.innerHTML =
+                '<div class="question-header">' +
+                    '<button class="nav-btn" onclick="prevQuestion()" ' + prevDisabled + '>&#8592; Prev</button>' +
+                    '<div class="header-center">' +
+                        '<span class="question-counter">Question ' + (index + 1) + ' of ' + (questions.length - 1) + '</span>' +
+                        '<span class="progress" id="progress"></span>' +
+                        '<span class="save-status" id="saveStatus"></span>' +
+                    '</div>' +
+                    '<button class="nav-btn" onclick="nextQuestion()" ' + nextDisabled + '>Next &#8594;</button>' +
+                '</div>' +
+                '<div class="question-stem">' + q.stem + '</div>' +
+                contentHtml;
+
+            updateProgress();
+        }
+
+        function startQuiz() {
+            quizStartTime = new Date();
+            logBehavior('quiz_started');
+            showQuestion(0);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > -1) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function handleAnswer() {
+            saveData();
+            if (currentQuestionIndex < questions.length - 1) {
+                setTimeout(nextQuestion, 800);
+            }
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('qbankQuiz');
+            return saved ? JSON.parse(saved) : {};
+        }
+
+        function saveData() {
+            const data = loadData();
+            const q = questions[currentQuestionIndex];
+            var sel = document.querySelector('input[name="q' + q.number + '"]:checked');
+            data[q.number] = { selected: sel ? parseInt(sel.value) : null };
+            localStorage.setItem('qbankQuiz', JSON.stringify(data));
+            showSaveStatus('Saved!');
+            updateProgress();
+        }
+
+        function showSaveStatus(message) {
+            var el = document.getElementById('saveStatus');
+            if (el) {
+                el.textContent = message;
+                el.className = 'save-status' + (message === 'Saved!' ? ' saved' : '');
+            }
+        }
+
+        function updateProgress() {
+            var data = loadData();
+            var answered = 0;
+            var totalQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
+            totalQuestions.forEach(function(q) {
+                if (data[q.number]?.selected !== null && data[q.number]?.selected !== undefined) answered++;
+            });
+            var el = document.getElementById('progress');
+            if (el) el.textContent = answered + '/' + totalQuestions.length + ' answered';
+        }
+
+        function submitQuiz() {
+            var nameInput = document.getElementById('playerName');
+            var submitBtn = document.getElementById('submitBtn');
+            var submitMsg = document.getElementById('submitMsg');
+            var name = nameInput ? nameInput.value.trim() : '';
+            if (!name) {
+                nameInput.focus();
+                nameInput.style.borderColor = '#c44';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            submitMsg.textContent = '';
+
+            // Capture final question timing
+            if (questionEnteredAt && currentQuestionIndex >= 0) {
+                var curQ = questions[currentQuestionIndex];
+                if (curQ && curQ.type !== 'submit') {
+                    var elapsed = Math.round((Date.now() - questionEnteredAt) / 1000);
+                    questionDurations[curQ.number] = (questionDurations[curQ.number] || 0) + elapsed;
+                }
+                questionEnteredAt = null;
+            }
+
+            var submitTime = new Date();
+            logBehavior('quiz_submitted');
+
+            var data = loadData();
+            var realQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
+            var lines = [];
+            realQuestions.forEach(function(q) {
+                var sel = data[q.number]?.selected;
+                var answer = sel !== null && sel !== undefined ? q.answers[sel] : 'No answer';
+                var duration = questionDurations[q.number] ? questionDurations[q.number] + 's' : '-';
+                lines.push('Q' + q.number + ' (' + duration + '): ' + answer);
+            });
+
+            var answered = 0;
+            realQuestions.forEach(function(q) {
+                if (data[q.number]?.selected !== null && data[q.number]?.selected !== undefined) answered++;
+            });
+            lines.push('');
+            lines.push('Answered: ' + answered + '/' + realQuestions.length);
+
+            // --- Metadata ---
+            lines.push('');
+            lines.push('=== METADATA ===');
+            lines.push('Quiz started: ' + (quizStartTime ? quizStartTime.toLocaleString() : 'Unknown'));
+            lines.push('Quiz submitted: ' + submitTime.toLocaleString());
+            if (quizStartTime) {
+                var totalSec = Math.round((submitTime - quizStartTime) / 1000);
+                var mins = Math.floor(totalSec / 60);
+                var secs = totalSec % 60;
+                lines.push('Total duration: ' + mins + 'm ' + secs + 's');
+            }
+
+            lines.push('');
+            lines.push('--- Time per question ---');
+            realQuestions.forEach(function(q) {
+                var dur = questionDurations[q.number];
+                var firstView = questionViewTimes[q.number] || 'never viewed';
+                lines.push('Q' + q.number + ': ' + (dur ? dur + 's' : 'not timed') + ' (first viewed: ' + firstView + ')');
+            });
+
+            if (behaviorLog.length > 0) {
+                lines.push('');
+                lines.push('--- Behavior flags ---');
+                var tabSwitches = behaviorLog.filter(function(e) { return e.type === 'tab_hidden' || e.type === 'window_blur'; });
+                var copyAttempts = behaviorLog.filter(function(e) { return e.type === 'copy_attempt'; });
+                lines.push('Tab switches / window blurs: ' + tabSwitches.length);
+                lines.push('Copy/select-all attempts: ' + copyAttempts.length);
+                lines.push('');
+                lines.push('Event log:');
+                behaviorLog.forEach(function(e) {
+                    lines.push('  [' + e.time + '] ' + e.type + (e.detail ? ' (' + e.detail + ')' : ''));
+                });
+            } else {
+                lines.push('');
+                lines.push('--- Behavior flags ---');
+                lines.push('No erratic behavior detected.');
+            }
+
+            var formData = new FormData();
+            formData.append('name', name);
+            formData.append('_subject', 'SONOGAMES quiz');
+            formData.append('message', lines.join('\n'));
+            formData.append('_captcha', 'false');
+            formData.append('_template', 'box');
+
+            fetch('https://formsubmit.co/ajax/christian.treat@stonybrookmedicine.edu', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    submitBtn.textContent = 'Submitted!';
+                    submitBtn.style.backgroundColor = '#2a8a4a';
+                    submitMsg.textContent = 'Your answers have been sent.';
+                    submitMsg.style.color = '#4a4';
+                } else {
+                    throw new Error('Submission failed');
+                }
+            })
+            .catch(function() {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                submitMsg.textContent = 'Something went wrong. Please try again.';
+                submitMsg.style.color = '#c44';
+            });
+        }
+
+        // Initialize
+        showQuestion(-1);
+    </script>
+</body>
+</html>
