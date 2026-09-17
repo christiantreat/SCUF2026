@@ -10,6 +10,6 @@ Resources from the talk. Each project is included in this repo and linked below.
 
 - **[Zine](https://christiantreat.github.io/zine/)** — Interactive zine maker ([repo](https://github.com/christiantreat/zine))
 
-- **[UltraClean](https://christiantreat.github.io/ultraclean/)** — Ultrasound probe cleaning checklist ([repo](https://github.com/christiantreat/ultraclean))
+- **[UltraClean](https://christiantreat.github.io/ultraclean/)** — Ultrasound image anonymizer and mask tool ([repo](https://github.com/christiantreat/ultraclean))
 
 - **[Ocular POCUS Simulator](ocular-pocus-simulator.html)** — VH vs RD gain-dependency teaching simulator (included in this repo)
